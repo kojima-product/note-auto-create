@@ -19,6 +19,7 @@ on:
 jobs:
   post-articles:
     runs-on: ubuntu-latest
+    environment: note-auto-create-actions  # Environment secretsを使用
     timeout-minutes: 360  # 6時間（5記事×1時間間隔 + バッファ）
 
     steps:
