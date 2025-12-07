@@ -13,6 +13,7 @@ from src.topic_collector import TopicCollector
 from src.article_generator import ArticleGenerator
 from src.note_publisher import NotePublisher
 from src.posted_tracker import PostedTracker
+from src.email_notifier import EmailNotifier
 
 
 def create_single_article(
@@ -20,13 +21,15 @@ def create_single_article(
     generator: ArticleGenerator,
     publisher: NotePublisher,
     tracker: PostedTracker,
+    notifier: EmailNotifier,
     price: int,
     dry_run: bool,
     article_num: int = 1,
     total: int = 1
-) -> bool:
-    """1つの記事を作成して投稿"""
+) -> dict:
+    """1つの記事を作成して投稿。結果をdictで返す"""
     prefix = f"[{article_num}/{total}] " if total > 1 else ""
+    result = {"success": False, "title": "", "error": None}
 
     # Step 1: トピック収集
     print(f"\n{prefix}[Step 1/3] トピックを収集中...")
@@ -35,7 +38,8 @@ def create_single_article(
 
     if not topic:
         print(f"{prefix}エラー: 未投稿のトピックが見つかりませんでした")
-        return False
+        result["error"] = "未投稿のトピックが見つかりませんでした"
+        return result
 
     print(f"\n{prefix}選択されたトピック:")
     print(f"  タイトル: {topic.title}")
@@ -74,12 +78,22 @@ def create_single_article(
 
     print(f"  バックアップ: {output_file}")
 
+    result["title"] = article.title
+
     # Dry-runモードの場合はここで終了
     if dry_run:
         print(f"\n{prefix}[Dry-run] noteへの投稿をスキップしました")
         # 投稿済みとして記録（dry-runでも重複防止のため）
         tracker.mark_as_posted(topic.link, topic.title)
-        return True
+        result["success"] = True
+        # メール通知
+        if notifier:
+            notifier.send_notification(
+                article_title=article.title,
+                success=True,
+                details="Dry-runモードで実行しました。記事は投稿されていません。"
+            )
+        return result
 
     # Step 3: noteに投稿
     print(f"\n{prefix}[Step 3/3] noteに投稿中...")
@@ -89,11 +103,27 @@ def create_single_article(
         # 投稿済みとして記録
         tracker.mark_as_posted(topic.link, topic.title)
         print(f"\n{prefix}投稿成功！")
-        return True
+        result["success"] = True
+        # メール通知
+        if notifier:
+            notifier.send_notification(
+                article_title=article.title,
+                success=True,
+                details=f"タグ: {', '.join(article.tags) if article.tags else 'なし'}\n文字数: {len(article.content)}文字"
+            )
+        return result
     else:
         print(f"\n{prefix}エラー: noteへの投稿に失敗しました")
         print(f"生成された記事は {output_file} に保存されています")
-        return False
+        result["error"] = "noteへの投稿に失敗しました"
+        # 失敗通知
+        if notifier:
+            notifier.send_notification(
+                article_title=article.title,
+                success=False,
+                details=f"記事は {output_file} に保存されています。"
+            )
+        return result
 
 
 def main():
@@ -172,33 +202,37 @@ def main():
     if args.count > 1:
         print(f"\n{args.count}件の記事を作成します（間隔: {args.interval}秒）")
 
-    # コレクター、ジェネレーター、パブリッシャーを初期化
+    # コレクター、ジェネレーター、パブリッシャー、通知を初期化
     use_web_search = not args.no_web_search
     collector = TopicCollector(use_web_search=use_web_search)
     generator = ArticleGenerator(model=args.model)
     publisher = NotePublisher(headless=args.headless, price=args.price) if not args.dry_run else None
+    notifier = EmailNotifier()
 
     # 記事を作成
     success_count = 0
     fail_count = 0
+    article_results = []
 
     for i in range(args.count):
         if i > 0:
             print(f"\n--- 次の記事まで {args.interval}秒 待機中... ---")
             time.sleep(args.interval)
 
-        success = create_single_article(
+        result = create_single_article(
             collector=collector,
             generator=generator,
             publisher=publisher,
             tracker=tracker,
+            notifier=notifier,
             price=args.price,
             dry_run=args.dry_run,
             article_num=i + 1,
             total=args.count
         )
 
-        if success:
+        article_results.append(result)
+        if result["success"]:
             success_count += 1
         else:
             fail_count += 1
@@ -207,6 +241,13 @@ def main():
     print("\n" + "=" * 50)
     if args.count > 1:
         print(f"完了！ 成功: {success_count}件, 失敗: {fail_count}件")
+        # 日次サマリーメール送信
+        if notifier.enabled:
+            notifier.send_daily_summary(
+                success_count=success_count,
+                fail_count=fail_count,
+                articles=article_results
+            )
     else:
         if success_count > 0:
             print("完了！記事が投稿されました。")

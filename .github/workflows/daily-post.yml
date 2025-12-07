@@ -19,7 +19,7 @@ on:
 jobs:
   post-articles:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 360  # 6時間（5記事×1時間間隔 + バッファ）
 
     steps:
       - name: Checkout repository
@@ -55,12 +55,15 @@ jobs:
           NOTE_EMAIL: ${{ secrets.NOTE_EMAIL }}
           NOTE_PASSWORD: ${{ secrets.NOTE_PASSWORD }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
           USE_MODEL: ${{ github.event.inputs.model || 'sonnet' }}
         run: |
           python -m src.main \
             --headless \
             --count ${{ github.event.inputs.count || '5' }} \
-            --interval 120 \
+            --interval 3600 \
             --model ${{ github.event.inputs.model || 'sonnet' }}
 
       - name: Upload generated articles
