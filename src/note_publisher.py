@@ -42,12 +42,28 @@ class NotePublisher:
             成功した場合True
         """
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=self.headless)
+            # headlessモードでもボット検出を回避するための設定
+            browser = p.chromium.launch(
+                headless=self.headless,
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                ]
+            )
             context = browser.new_context(
                 viewport={"width": 1280, "height": 900},
                 locale="ja-JP",
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             )
             page = context.new_page()
+
+            # webdriverプロパティを削除してボット検出を回避
+            page.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                });
+            """)
 
             try:
                 # ログイン
@@ -83,17 +99,55 @@ class NotePublisher:
 
         page.goto(self.LOGIN_URL)
         page.wait_for_load_state("networkidle")
-        time.sleep(2)
+        time.sleep(3)
 
-        page.locator('input#email').fill(self.email)
-        page.locator('input#password').fill(self.password)
-        page.locator('button:has-text("ログイン")').click()
+        # デバッグ用スクリーンショット
+        page.screenshot(path="debug_login_page.png")
+        print("  デバッグ: ログインページのスクリーンショットを保存")
+
+        # メールアドレス入力
+        try:
+            email_input = page.locator('input#email')
+            email_input.wait_for(state="visible", timeout=10000)
+            email_input.fill(self.email)
+            print("  メールアドレス入力完了")
+        except Exception as e:
+            print(f"  メールアドレス入力エラー: {e}")
+            page.screenshot(path="debug_email_error.png")
+            return False
+
+        # パスワード入力
+        try:
+            password_input = page.locator('input#password')
+            password_input.wait_for(state="visible", timeout=10000)
+            password_input.fill(self.password)
+            print("  パスワード入力完了")
+        except Exception as e:
+            print(f"  パスワード入力エラー: {e}")
+            page.screenshot(path="debug_password_error.png")
+            return False
+
+        # ログインボタンクリック
+        try:
+            login_button = page.locator('button:has-text("ログイン")')
+            login_button.wait_for(state="visible", timeout=10000)
+            login_button.click()
+            print("  ログインボタンクリック完了")
+        except Exception as e:
+            print(f"  ログインボタンエラー: {e}")
+            page.screenshot(path="debug_login_button_error.png")
+            return False
 
         try:
-            page.wait_for_url("**/", timeout=15000)
-            time.sleep(2)
+            # ログイン後のページ遷移を待つ
+            page.wait_for_url("**/", timeout=30000)
+            time.sleep(3)
+            page.screenshot(path="debug_after_login.png")
+            print("  ログイン後のスクリーンショットを保存")
             return True
-        except Exception:
+        except Exception as e:
+            print(f"  ログイン後の画面遷移エラー: {e}")
+            page.screenshot(path="debug_login_failed.png")
             return False
 
     def _clean_content_for_note(self, content: str) -> str:
@@ -187,11 +241,64 @@ class NotePublisher:
 
         page.goto(self.NEW_TEXT_URL)
         page.wait_for_load_state("networkidle")
+        time.sleep(5)  # ページ読み込みを待つ（headlessモードではより長く）
+
+        # DOMの完全読み込みを待つ
+        page.wait_for_load_state("domcontentloaded")
         time.sleep(2)
 
-        # タイトル入力
+        # デバッグ用スクリーンショット
+        page.screenshot(path="debug_new_article_page.png")
+        print("  デバッグ: 記事作成ページのスクリーンショットを保存")
+
+        # ページURLを確認（リダイレクトされていないか）
+        current_url = page.url
+        print(f"  現在のURL: {current_url}")
+        if "login" in current_url.lower():
+            print("  警告: ログインページにリダイレクトされました。再ログインが必要かもしれません。")
+            page.screenshot(path="debug_redirected_to_login.png")
+            return False
+
+        # タイトル入力（複数のセレクターを試す）
         print("タイトルを入力中...")
-        page.locator('textarea[placeholder="記事タイトル"]').fill(article.title)
+        title_selectors = [
+            'textarea[placeholder="記事タイトル"]',
+            'textarea[placeholder*="タイトル"]',
+            'textarea.title',
+            '[data-testid="title-input"]',
+            'textarea:first-of-type',
+        ]
+
+        title_input = None
+        for selector in title_selectors:
+            try:
+                locator = page.locator(selector)
+                if locator.count() > 0:
+                    # 要素が見つかった場合、表示されるまで待つ
+                    locator.first.wait_for(state="visible", timeout=10000)
+                    title_input = locator.first
+                    print(f"  タイトル入力欄を発見: {selector}")
+                    break
+            except Exception:
+                continue
+
+        if not title_input:
+            # 最後の手段: ページ上の最初のtextareaを使用
+            print("  警告: 標準セレクターでタイトル入力欄が見つかりません。textareaを検索中...")
+            page.screenshot(path="debug_title_not_found.png")
+            try:
+                all_textareas = page.locator('textarea').all()
+                print(f"  ページ上のtextarea数: {len(all_textareas)}")
+                if all_textareas:
+                    title_input = all_textareas[0]
+            except Exception as e:
+                print(f"  textarea検索エラー: {e}")
+
+        if not title_input:
+            print("エラー: タイトル入力欄が見つかりません")
+            return False
+
+        title_input.fill(article.title)
         time.sleep(1)
 
         # 本文入力（マーカー含む全体をタイピング）
