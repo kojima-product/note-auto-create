@@ -1,0 +1,222 @@
+"""メインスクリプト - note自動記事作成"""
+
+import argparse
+import sys
+import time
+from pathlib import Path
+from datetime import datetime
+
+# プロジェクトルートをパスに追加
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from src.topic_collector import TopicCollector
+from src.article_generator import ArticleGenerator
+from src.note_publisher import NotePublisher
+from src.posted_tracker import PostedTracker
+
+
+def create_single_article(
+    collector: TopicCollector,
+    generator: ArticleGenerator,
+    publisher: NotePublisher,
+    tracker: PostedTracker,
+    price: int,
+    dry_run: bool,
+    article_num: int = 1,
+    total: int = 1
+) -> bool:
+    """1つの記事を作成して投稿"""
+    prefix = f"[{article_num}/{total}] " if total > 1 else ""
+
+    # Step 1: トピック収集
+    print(f"\n{prefix}[Step 1/3] トピックを収集中...")
+    posted_urls = tracker.get_posted_urls()
+    topic = collector.select_best_topic(exclude_urls=posted_urls)
+
+    if not topic:
+        print(f"{prefix}エラー: 未投稿のトピックが見つかりませんでした")
+        return False
+
+    print(f"\n{prefix}選択されたトピック:")
+    print(f"  タイトル: {topic.title}")
+    print(f"  ソース: {topic.source}")
+    print(f"  リンク: {topic.link}")
+
+    # Step 2: 記事生成
+    print(f"\n{prefix}[Step 2/3] 記事を生成中...")
+    article = generator.generate(topic)
+
+    print(f"\n{prefix}生成された記事:")
+    print(f"  タイトル: {article.title}")
+    print(f"  タグ: {', '.join(article.tags) if article.tags else 'なし'}")
+    print(f"  文字数: {len(article.content)} 文字")
+    print(f"  価格: {price}円")
+    if article.thumbnail_prompt:
+        print(f"  サムネイル: {article.thumbnail_prompt[:50]}...")
+
+    # 生成された記事をファイルに保存（バックアップ）
+    output_dir = Path("output")
+    output_dir.mkdir(exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_file = output_dir / f"article_{timestamp}.md"
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(f"# {article.title}\n\n")
+        if article.tags:
+            f.write(f"**Tags:** {', '.join(article.tags)}\n\n")
+        f.write(f"---\n\n")
+        f.write(article.content)
+        if article.thumbnail_prompt:
+            f.write(f"\n\n---\n\n")
+            f.write(f"## Thumbnail Prompt (for Whisk)\n")
+            f.write(f"```\n{article.thumbnail_prompt}\n```\n")
+
+    print(f"  バックアップ: {output_file}")
+
+    # Dry-runモードの場合はここで終了
+    if dry_run:
+        print(f"\n{prefix}[Dry-run] noteへの投稿をスキップしました")
+        # 投稿済みとして記録（dry-runでも重複防止のため）
+        tracker.mark_as_posted(topic.link, topic.title)
+        return True
+
+    # Step 3: noteに投稿
+    print(f"\n{prefix}[Step 3/3] noteに投稿中...")
+    success = publisher.publish(article)
+
+    if success:
+        # 投稿済みとして記録
+        tracker.mark_as_posted(topic.link, topic.title)
+        print(f"\n{prefix}投稿成功！")
+        return True
+    else:
+        print(f"\n{prefix}エラー: noteへの投稿に失敗しました")
+        print(f"生成された記事は {output_file} に保存されています")
+        return False
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="AI/プログラミング関連ニュースから記事を自動生成してnoteに投稿"
+    )
+    parser.add_argument(
+        "--model",
+        choices=["opus", "sonnet", "haiku"],
+        default=None,
+        help="使用するモデル (opus: 最高品質, sonnet: バランス, haiku: 高速・低コスト)"
+    )
+    parser.add_argument(
+        "--headless",
+        action="store_true",
+        help="ブラウザを非表示で実行"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="記事生成まで行い、noteへの投稿はスキップ"
+    )
+    parser.add_argument(
+        "--test-login",
+        action="store_true",
+        help="noteへのログインのみをテスト"
+    )
+    parser.add_argument(
+        "--price",
+        type=int,
+        default=100,
+        help="有料記事の価格（円）。デフォルト: 100円"
+    )
+    parser.add_argument(
+        "--no-web-search",
+        action="store_true",
+        help="Web検索を無効にし、RSSフィードのみ使用"
+    )
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=1,
+        help="作成する記事の数（デフォルト: 1）"
+    )
+    parser.add_argument(
+        "--interval",
+        type=int,
+        default=60,
+        help="複数記事作成時の間隔（秒）。デフォルト: 60秒"
+    )
+
+    args = parser.parse_args()
+
+    # ログインテストモード
+    if args.test_login:
+        print("=" * 50)
+        print("noteログインテスト")
+        print("=" * 50)
+        publisher = NotePublisher(headless=False)
+        if publisher.test_login():
+            print("テスト成功")
+        else:
+            print("テスト失敗")
+        return
+
+    print("=" * 50)
+    print("note自動記事作成ツール")
+    print("=" * 50)
+
+    # 投稿済みトラッカーを初期化
+    tracker = PostedTracker()
+    posted_count = tracker.get_posted_count()
+    if posted_count > 0:
+        print(f"（投稿済み: {posted_count}件）")
+
+    if args.count > 1:
+        print(f"\n{args.count}件の記事を作成します（間隔: {args.interval}秒）")
+
+    # コレクター、ジェネレーター、パブリッシャーを初期化
+    use_web_search = not args.no_web_search
+    collector = TopicCollector(use_web_search=use_web_search)
+    generator = ArticleGenerator(model=args.model)
+    publisher = NotePublisher(headless=args.headless, price=args.price) if not args.dry_run else None
+
+    # 記事を作成
+    success_count = 0
+    fail_count = 0
+
+    for i in range(args.count):
+        if i > 0:
+            print(f"\n--- 次の記事まで {args.interval}秒 待機中... ---")
+            time.sleep(args.interval)
+
+        success = create_single_article(
+            collector=collector,
+            generator=generator,
+            publisher=publisher,
+            tracker=tracker,
+            price=args.price,
+            dry_run=args.dry_run,
+            article_num=i + 1,
+            total=args.count
+        )
+
+        if success:
+            success_count += 1
+        else:
+            fail_count += 1
+
+    # 結果サマリー
+    print("\n" + "=" * 50)
+    if args.count > 1:
+        print(f"完了！ 成功: {success_count}件, 失敗: {fail_count}件")
+    else:
+        if success_count > 0:
+            print("完了！記事が投稿されました。")
+        else:
+            print("記事の投稿に失敗しました。")
+    print("=" * 50)
+
+    if fail_count > 0:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

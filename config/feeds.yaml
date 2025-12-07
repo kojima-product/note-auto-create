@@ -1,0 +1,225 @@
+# テクノロジー関連のRSSフィード設定
+# カテゴリ: ai, programming, web, devops, security, mobile, business, column
+
+feeds:
+  # ===== 日本語フィード =====
+
+  # AI・機械学習
+  - name: "ITmedia AI+"
+    url: "https://rss.itmedia.co.jp/rss/2.0/aiplus.xml"
+    category: "ai"
+    language: "ja"
+
+  - name: "AI-SCHOLAR"
+    url: "https://ai-scholar.tech/feed"
+    category: "ai"
+    language: "ja"
+
+  # プログラミング・開発
+  - name: "Publickey"
+    url: "https://www.publickey1.jp/atom.xml"
+    category: "programming"
+    language: "ja"
+
+  - name: "Zenn トレンド"
+    url: "https://zenn.dev/feed"
+    category: "programming"
+    language: "ja"
+
+  - name: "Qiita トレンド"
+    url: "https://qiita.com/popular-items/feed"
+    category: "programming"
+    language: "ja"
+
+  - name: "CodeZine"
+    url: "https://codezine.jp/rss/new/20/index.xml"
+    category: "programming"
+    language: "ja"
+
+  # 総合テック・ニュース
+  - name: "GIGAZINE"
+    url: "https://gigazine.net/news/rss_2.0/"
+    category: "tech"
+    language: "ja"
+
+  - name: "ITmedia NEWS"
+    url: "https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml"
+    category: "tech"
+    language: "ja"
+
+  - name: "CNET Japan"
+    url: "https://japan.cnet.com/rss/index.rdf"
+    category: "tech"
+    language: "ja"
+
+  - name: "Impress Watch"
+    url: "https://www.watch.impress.co.jp/data/rss/1.0/ipw/feed.rdf"
+    category: "tech"
+    language: "ja"
+
+  # Web開発
+  - name: "Coliss"
+    url: "https://coliss.com/feed/"
+    category: "web"
+    language: "ja"
+
+  - name: "ICS MEDIA"
+    url: "https://ics.media/feed/"
+    category: "web"
+    language: "ja"
+
+  # クラウド・DevOps
+  - name: "クラスメソッド"
+    url: "https://dev.classmethod.jp/feed/"
+    category: "devops"
+    language: "ja"
+
+  # セキュリティ
+  - name: "Security NEXT"
+    url: "https://www.security-next.com/feed"
+    category: "security"
+    language: "ja"
+
+  # ビジネス・スタートアップ
+  - name: "TechCrunch Japan"
+    url: "https://jp.techcrunch.com/feed/"
+    category: "business"
+    language: "ja"
+
+  - name: "BRIDGE"
+    url: "https://thebridge.jp/feed"
+    category: "business"
+    language: "ja"
+
+  # ===== 英語フィード =====
+
+  # AI・機械学習
+  - name: "TechCrunch AI"
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+    category: "ai"
+    language: "en"
+
+  - name: "The Verge AI"
+    url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml"
+    category: "ai"
+    language: "en"
+
+  - name: "OpenAI Blog"
+    url: "https://openai.com/blog/rss.xml"
+    category: "ai"
+    language: "en"
+
+  - name: "Google AI Blog"
+    url: "https://blog.google/technology/ai/rss/"
+    category: "ai"
+    language: "en"
+
+  - name: "MIT Tech Review AI"
+    url: "https://www.technologyreview.com/topic/artificial-intelligence/feed"
+    category: "ai"
+    language: "en"
+
+  # プログラミング・開発
+  - name: "Hacker News"
+    url: "https://hnrss.org/frontpage"
+    category: "programming"
+    language: "en"
+
+  - name: "Dev.to"
+    url: "https://dev.to/feed"
+    category: "programming"
+    language: "en"
+
+  - name: "GitHub Blog"
+    url: "https://github.blog/feed/"
+    category: "programming"
+    language: "en"
+
+  - name: "The Pragmatic Engineer"
+    url: "https://newsletter.pragmaticengineer.com/feed"
+    category: "column"
+    language: "en"
+
+  # JavaScript/Web
+  - name: "JavaScript Weekly"
+    url: "https://javascriptweekly.com/rss/"
+    category: "web"
+    language: "en"
+
+  - name: "CSS-Tricks"
+    url: "https://css-tricks.com/feed/"
+    category: "web"
+    language: "en"
+
+  - name: "Smashing Magazine"
+    url: "https://www.smashingmagazine.com/feed/"
+    category: "web"
+    language: "en"
+
+  # Python
+  - name: "Real Python"
+    url: "https://realpython.com/atom.xml"
+    category: "programming"
+    language: "en"
+
+  - name: "Python Weekly"
+    url: "https://us2.campaign-archive.com/feed?u=e2e180baf855ac797ef407fc7&id=9e26887fc5"
+    category: "programming"
+    language: "en"
+
+  # Rust
+  - name: "This Week in Rust"
+    url: "https://this-week-in-rust.org/rss.xml"
+    category: "programming"
+    language: "en"
+
+  # DevOps・クラウド
+  - name: "AWS News Blog"
+    url: "https://aws.amazon.com/blogs/aws/feed/"
+    category: "devops"
+    language: "en"
+
+  - name: "Kubernetes Blog"
+    url: "https://kubernetes.io/feed.xml"
+    category: "devops"
+    language: "en"
+
+  # セキュリティ
+  - name: "The Hacker News"
+    url: "https://feeds.feedburner.com/TheHackersNews"
+    category: "security"
+    language: "en"
+
+  - name: "Krebs on Security"
+    url: "https://krebsonsecurity.com/feed/"
+    category: "security"
+    language: "en"
+
+  # ビジネス・スタートアップ
+  - name: "TechCrunch"
+    url: "https://techcrunch.com/feed/"
+    category: "business"
+    language: "en"
+
+  - name: "Wired"
+    url: "https://www.wired.com/feed/rss"
+    category: "tech"
+    language: "en"
+
+# トピック選択の設定
+selection:
+  # 優先するカテゴリ順
+  priority_categories:
+    - ai
+    - programming
+    - web
+    - devops
+    - security
+    - business
+    - column
+    - tech
+    - mobile
+  # 優先する言語
+  priority_language: "ja"
+  # 記事の最大取得日数（今週のトピックに限定）
+  max_age_days: 7
