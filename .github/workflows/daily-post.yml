@@ -16,6 +16,9 @@ on:
         required: false
         default: 'sonnet'
 
+permissions:
+  contents: write  # リポジトリへの書き込み権限
+
 jobs:
   post-articles:
     runs-on: ubuntu-latest
