@@ -69,9 +69,9 @@ class TopicCollector:
         if topic.category in priority_categories:
             score += (len(priority_categories) - priority_categories.index(topic.category)) * 10
 
-        # 言語優先度
+        # 言語優先度（日本語を大幅に優先）
         if topic.language == self.selection.get("priority_language", "ja"):
-            score += 5
+            score += 30
 
         # 新しさ（新しいほど高得点 - 今週のニュースを優先）
         if topic.published:
@@ -210,21 +210,29 @@ class TopicCollector:
 
         return topics
 
-    def select_best_topic(self, exclude_urls: list[str] = None) -> Optional[Topic]:
-        """最適なトピックを1つ選択（投稿済みURLを除外）"""
+    def select_best_topic(self, exclude_urls: list[str] = None, tracker=None) -> Optional[Topic]:
+        """最適なトピックを1つ選択（投稿済みURLと類似タイトルを除外）"""
         topics = self.fetch_topics()
 
         if not topics:
             print("トピックが見つかりませんでした")
             return None
 
-        # 投稿済みトピックを除外
+        # 投稿済みトピックを除外（URL）
         if exclude_urls:
             original_count = len(topics)
             topics = [t for t in topics if t.link not in exclude_urls]
             excluded_count = original_count - len(topics)
             if excluded_count > 0:
-                print(f"  投稿済みトピックを除外: {excluded_count}件")
+                print(f"  投稿済みトピック(URL)を除外: {excluded_count}件")
+
+        # 類似タイトルのトピックを除外
+        if tracker:
+            original_count = len(topics)
+            topics = [t for t in topics if not tracker.is_similar_posted(t.title)]
+            excluded_count = original_count - len(topics)
+            if excluded_count > 0:
+                print(f"  類似トピック(タイトル)を除外: {excluded_count}件")
 
         if not topics:
             print("未投稿のトピックが見つかりませんでした")

@@ -34,7 +34,7 @@ def create_single_article(
     # Step 1: トピック収集
     print(f"\n{prefix}[Step 1/3] トピックを収集中...")
     posted_urls = tracker.get_posted_urls()
-    topic = collector.select_best_topic(exclude_urls=posted_urls)
+    topic = collector.select_best_topic(exclude_urls=posted_urls, tracker=tracker)
 
     if not topic:
         print(f"{prefix}エラー: 未投稿のトピックが見つかりませんでした")

@@ -167,15 +167,17 @@ class NotePublisher:
                     # コードブロック開始
                     in_code_block = True
                     code_block_content = []
-                    # 言語指定を除去（```python → ```）
-                    cleaned_lines.append('```')
+                    # コードブロックを引用ブロック風に変換（note.comで正しく表示される）
+                    cleaned_lines.append('')
+                    cleaned_lines.append('**【コード例】**')
                 else:
                     # コードブロック終了
                     in_code_block = False
-                    # コード内容を追加
+                    # コード内容を引用ブロックとして追加
                     for code_line in code_block_content:
-                        cleaned_lines.append(code_line)
-                    cleaned_lines.append('```')
+                        # 各行を引用形式に変換
+                        cleaned_lines.append(f'> {code_line}' if code_line.strip() else '>')
+                    cleaned_lines.append('')
                 continue
 
             if in_code_block:
@@ -214,10 +216,6 @@ class NotePublisher:
 
         # 箇条書き項目間の余分な空行を削除
         content = re.sub(r'(^- .+)\n\n(?=- )', r'\1\n', content, flags=re.MULTILINE)
-
-        # コードブロックの前後に空行を確保
-        content = re.sub(r'([^\n])\n```', r'\1\n\n```', content)
-        content = re.sub(r'```\n([^\n`])', r'```\n\n\1', content)
 
         # 先頭と末尾の空白を削除
         content = content.strip()
@@ -411,7 +409,7 @@ class NotePublisher:
 
             marker_element = None
             # スクロールしながらマーカーを探す
-            for scroll_attempt in range(5):
+            for _ in range(5):
                 for pattern in marker_patterns:
                     try:
                         elem = page.locator(f'text="{pattern}"').first

@@ -221,5 +221,5 @@ selection:
     - mobile
   # 優先する言語
   priority_language: "ja"
-  # 記事の最大取得日数（今週のトピックに限定）
-  max_age_days: 7
+  # 記事の最大取得日数（最新ニュースに限定）
+  max_age_days: 3
