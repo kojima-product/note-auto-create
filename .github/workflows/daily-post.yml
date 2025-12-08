@@ -15,6 +15,10 @@ on:
         description: '使用するモデル (opus/sonnet/haiku)'
         required: false
         default: 'sonnet'
+      free_ratio:
+        description: '無料記事の割合 (0.0-1.0)'
+        required: false
+        default: '0.8'
 
 permissions:
   contents: write  # リポジトリへの書き込み権限
@@ -68,7 +72,8 @@ jobs:
             --headless \
             --count ${{ github.event.inputs.count || '5' }} \
             --interval 3600 \
-            --model ${{ github.event.inputs.model || 'sonnet' }}
+            --model ${{ github.event.inputs.model || 'sonnet' }} \
+            --free-ratio ${{ github.event.inputs.free_ratio || '0.8' }}
 
       - name: Upload generated articles
         uses: actions/upload-artifact@v4

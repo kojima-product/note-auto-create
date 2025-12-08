@@ -1,6 +1,7 @@
 """メインスクリプト - note自動記事作成"""
 
 import argparse
+import random
 import sys
 import time
 from pathlib import Path
@@ -25,11 +26,13 @@ def create_single_article(
     price: int,
     dry_run: bool,
     article_num: int = 1,
-    total: int = 1
+    total: int = 1,
+    is_free: bool = False
 ) -> dict:
     """1つの記事を作成して投稿。結果をdictで返す"""
     prefix = f"[{article_num}/{total}] " if total > 1 else ""
-    result = {"success": False, "title": "", "error": None}
+    article_type = "無料記事" if is_free else f"有料記事（{price}円）"
+    result = {"success": False, "title": "", "error": None, "is_free": is_free}
 
     # Step 1: トピック収集
     print(f"\n{prefix}[Step 1/3] トピックを収集中...")
@@ -47,14 +50,14 @@ def create_single_article(
     print(f"  リンク: {topic.link}")
 
     # Step 2: 記事生成
-    print(f"\n{prefix}[Step 2/3] 記事を生成中...")
-    article = generator.generate(topic)
+    print(f"\n{prefix}[Step 2/3] 記事を生成中...（{article_type}）")
+    article = generator.generate(topic, is_free=is_free)
 
     print(f"\n{prefix}生成された記事:")
     print(f"  タイトル: {article.title}")
     print(f"  タグ: {', '.join(article.tags) if article.tags else 'なし'}")
     print(f"  文字数: {len(article.content)} 文字")
-    print(f"  価格: {price}円")
+    print(f"  記事タイプ: {article_type}")
     if article.thumbnail_prompt:
         print(f"  サムネイル: {article.thumbnail_prompt[:50]}...")
 
@@ -174,6 +177,12 @@ def main():
         default=60,
         help="複数記事作成時の間隔（秒）。デフォルト: 60秒"
     )
+    parser.add_argument(
+        "--free-ratio",
+        type=float,
+        default=0.0,
+        help="無料記事の割合（0.0〜1.0）。例: 0.3 = 30%%の確率で無料記事。デフォルト: 0.0（全て有料）"
+    )
 
     args = parser.parse_args()
 
@@ -202,12 +211,18 @@ def main():
     if args.count > 1:
         print(f"\n{args.count}件の記事を作成します（間隔: {args.interval}秒）")
 
-    # コレクター、ジェネレーター、パブリッシャー、通知を初期化
+    if args.free_ratio > 0:
+        print(f"無料記事の割合: {args.free_ratio * 100:.0f}%")
+
+    # コレクター、ジェネレーター、通知を初期化
     use_web_search = not args.no_web_search
     collector = TopicCollector(use_web_search=use_web_search)
     generator = ArticleGenerator(model=args.model)
-    publisher = NotePublisher(headless=args.headless, price=args.price) if not args.dry_run else None
     notifier = EmailNotifier()
+
+    # パブリッシャーは有料用と無料用で分けて作成（dry-runでない場合）
+    publisher_paid = NotePublisher(headless=args.headless, price=args.price) if not args.dry_run else None
+    publisher_free = NotePublisher(headless=args.headless, price=0) if not args.dry_run else None
 
     # 記事を作成
     success_count = 0
@@ -219,16 +234,22 @@ def main():
             print(f"\n--- 次の記事まで {args.interval}秒 待機中... ---")
             time.sleep(args.interval)
 
+        # ランダムに無料/有料を決定
+        is_free = random.random() < args.free_ratio
+        publisher = publisher_free if is_free else publisher_paid
+        current_price = 0 if is_free else args.price
+
         result = create_single_article(
             collector=collector,
             generator=generator,
             publisher=publisher,
             tracker=tracker,
             notifier=notifier,
-            price=args.price,
+            price=current_price,
             dry_run=args.dry_run,
             article_num=i + 1,
-            total=args.count
+            total=args.count,
+            is_free=is_free
         )
 
         article_results.append(result)

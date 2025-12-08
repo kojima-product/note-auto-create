@@ -328,30 +328,34 @@ class NotePublisher:
             print(f"タグを入力中: {article.tags}")
             self._input_tags(page, article.tags)
 
-        # 有料設定（価格）
-        if self.price and self.price > 0:
+        # 有料設定（価格が設定されている場合のみ）
+        is_paid_article = self.price and self.price > 0
+        if is_paid_article:
             print(f"有料設定中: {self.price}円")
             self._set_paid_article(page, self.price)
+        else:
+            print("無料記事として投稿します")
 
         # 投稿する
         print("投稿中...")
 
-        # 有料の場合は「有料エリア設定」ボタン → 有料ライン選択画面 → 投稿
-        paid_publish_button = page.locator('button:has-text("有料エリア設定")')
-        if paid_publish_button.is_visible():
-            paid_publish_button.click()
-            time.sleep(3)
+        if is_paid_article:
+            # 有料の場合は「有料エリア設定」ボタン → 有料ライン選択画面 → 投稿
+            paid_publish_button = page.locator('button:has-text("有料エリア設定")')
+            if paid_publish_button.is_visible():
+                paid_publish_button.click()
+                time.sleep(3)
 
-            # 有料ライン選択画面が表示される
-            # 「===ここから有料===」マーカーの位置を探して、その直前のラインを設定
-            self._select_paid_line_position(page)
+                # 有料ライン選択画面が表示される
+                # 「===ここから有料===」マーカーの位置を探して、その直前のラインを設定
+                self._select_paid_line_position(page)
 
-            # 「投稿する」ボタンをクリック
-            final_publish = page.locator('button:has-text("投稿する")')
-            if final_publish.is_visible():
-                final_publish.click()
-                time.sleep(5)
-                return True
+                # 「投稿する」ボタンをクリック
+                final_publish = page.locator('button:has-text("投稿する")')
+                if final_publish.is_visible():
+                    final_publish.click()
+                    time.sleep(5)
+                    return True
 
         # 無料の場合は直接「投稿する」ボタン
         publish_button = page.locator('button:has-text("投稿する")')
