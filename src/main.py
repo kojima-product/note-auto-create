@@ -1,6 +1,8 @@
 """メインスクリプト - note自動記事作成"""
 
 import argparse
+import glob
+import os
 import random
 import sys
 import time
@@ -15,6 +17,43 @@ from src.article_generator import ArticleGenerator
 from src.note_publisher import NotePublisher
 from src.posted_tracker import PostedTracker
 from src.email_notifier import EmailNotifier
+from src.thumbnail_generator import ThumbnailGenerator
+
+
+def cleanup_generated_files():
+    """生成されたファイルを削除（リポジトリを軽く保つため）"""
+    project_root = Path(__file__).parent.parent
+    deleted_count = 0
+
+    # output/内のmdファイルを削除
+    for md_file in glob.glob(str(project_root / "output" / "*.md")):
+        try:
+            os.remove(md_file)
+            deleted_count += 1
+        except Exception:
+            pass
+
+    # output/thumbnails/内の画像ファイルを削除
+    for img_file in glob.glob(str(project_root / "output" / "thumbnails" / "*")):
+        try:
+            os.remove(img_file)
+            deleted_count += 1
+        except Exception:
+            pass
+
+    # ルートディレクトリのスクリーンショットを削除
+    for pattern in ["debug_*.png", "error_*.png", "*.png", "*.jpg"]:
+        for img_file in glob.glob(str(project_root / pattern)):
+            # venvなどの重要なディレクトリは除外
+            if "venv" not in img_file and "site-packages" not in img_file:
+                try:
+                    os.remove(img_file)
+                    deleted_count += 1
+                except Exception:
+                    pass
+
+    if deleted_count > 0:
+        print(f"クリーンアップ: {deleted_count}件のファイルを削除しました")
 
 
 def create_single_article(
@@ -27,7 +66,8 @@ def create_single_article(
     dry_run: bool,
     article_num: int = 1,
     total: int = 1,
-    is_free: bool = False
+    is_free: bool = False,
+    thumbnail_generator: ThumbnailGenerator = None
 ) -> dict:
     """1つの記事を作成して投稿。結果をdictで返す"""
     prefix = f"[{article_num}/{total}] " if total > 1 else ""
@@ -60,6 +100,23 @@ def create_single_article(
     print(f"  記事タイプ: {article_type}")
     if article.thumbnail_prompt:
         print(f"  サムネイル: {article.thumbnail_prompt[:50]}...")
+
+    # サムネイル画像を生成
+    thumbnail_path = None
+    if thumbnail_generator:
+        print(f"\n{prefix}サムネイル画像を生成中...")
+        try:
+            # thumbnail_promptがあればそれを使用、なければタイトルから生成
+            if article.thumbnail_prompt:
+                thumbnail_path = thumbnail_generator.generate(article.thumbnail_prompt)
+            else:
+                thumbnail_path = thumbnail_generator.generate_from_article(
+                    article.title, article.tags
+                )
+            if thumbnail_path:
+                print(f"  サムネイル生成完了: {thumbnail_path}")
+        except Exception as e:
+            print(f"  サムネイル生成エラー（続行します）: {e}")
 
     # 生成された記事をファイルに保存（バックアップ）
     output_dir = Path("output")
@@ -100,7 +157,7 @@ def create_single_article(
 
     # Step 3: noteに投稿
     print(f"\n{prefix}[Step 3/3] noteに投稿中...")
-    success = publisher.publish(article)
+    success = publisher.publish(article, thumbnail_path=thumbnail_path)
 
     if success:
         # 投稿済みとして記録
@@ -129,10 +186,93 @@ def create_single_article(
         return result
 
 
+def post_existing_article(article_file: str, thumbnail_path: str = None, headless: bool = False, price: int = 300):
+    """既存の記事ファイルを投稿する"""
+    from src.article_generator import Article
+
+    print("=" * 50)
+    print("既存記事の投稿")
+    print("=" * 50)
+
+    # 記事ファイルを読み込み
+    with open(article_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # タイトルとコンテンツを解析
+    lines = content.split("\n")
+    title = ""
+    tags = []
+    body_start = 0
+
+    for i, line in enumerate(lines):
+        if line.startswith("# "):
+            title = line[2:].strip()
+        elif line.startswith("**Tags:**"):
+            tag_str = line.replace("**Tags:**", "").strip()
+            tags = [t.strip() for t in tag_str.split(",")]
+        elif line.startswith("---"):
+            body_start = i + 1
+            break
+
+    body = "\n".join(lines[body_start:]).strip()
+
+    # Articleオブジェクトを作成
+    article = Article(
+        title=title,
+        content=body,
+        tags=tags
+    )
+
+    print(f"タイトル: {article.title}")
+    print(f"タグ: {', '.join(article.tags) if article.tags else 'なし'}")
+    print(f"文字数: {len(article.content)} 文字")
+    if thumbnail_path:
+        print(f"サムネイル: {thumbnail_path}")
+
+    # 投稿
+    publisher = NotePublisher(headless=headless, price=price)
+    success = publisher.publish(article, thumbnail_path=thumbnail_path)
+
+    if success:
+        print("\n投稿成功！")
+        return True
+    else:
+        print("\n投稿失敗")
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="AI/プログラミング関連ニュースから記事を自動生成してnoteに投稿"
     )
+
+    # サブコマンドを追加
+    subparsers = parser.add_subparsers(dest="command", help="コマンド")
+
+    # postサブコマンド（既存記事の投稿）
+    post_parser = subparsers.add_parser("post", help="既存の記事ファイルを投稿")
+    post_parser.add_argument(
+        "--file",
+        required=True,
+        help="投稿する記事ファイル（Markdown）"
+    )
+    post_parser.add_argument(
+        "--thumbnail",
+        help="サムネイル画像のパス"
+    )
+    post_parser.add_argument(
+        "--headless",
+        action="store_true",
+        help="ブラウザを非表示で実行"
+    )
+    post_parser.add_argument(
+        "--price",
+        type=int,
+        default=300,
+        help="有料記事の価格（円）。デフォルト: 300円"
+    )
+
+    # メインコマンドの引数
     parser.add_argument(
         "--model",
         choices=["opus", "sonnet", "haiku"],
@@ -157,8 +297,8 @@ def main():
     parser.add_argument(
         "--price",
         type=int,
-        default=100,
-        help="有料記事の価格（円）。デフォルト: 100円"
+        default=300,
+        help="有料記事の価格（円）。デフォルト: 300円"
     )
     parser.add_argument(
         "--no-web-search",
@@ -183,8 +323,31 @@ def main():
         default=0.0,
         help="無料記事の割合（0.0〜1.0）。例: 0.3 = 30%%の確率で無料記事。デフォルト: 0.0（全て有料）"
     )
+    parser.add_argument(
+        "--no-thumbnail",
+        action="store_true",
+        help="サムネイル画像の自動生成を無効化"
+    )
+    parser.add_argument(
+        "--thumbnail-model",
+        choices=["flash", "pro"],
+        default="pro",
+        help="サムネイル生成に使用するモデル (flash: 高速, pro: 高品質)。デフォルト: pro"
+    )
 
     args = parser.parse_args()
+
+    # postサブコマンドの処理
+    if args.command == "post":
+        success = post_existing_article(
+            article_file=args.file,
+            thumbnail_path=args.thumbnail,
+            headless=args.headless,
+            price=args.price
+        )
+        # クリーンアップ
+        cleanup_generated_files()
+        sys.exit(0 if success else 1)
 
     # ログインテストモード
     if args.test_login:
@@ -220,6 +383,16 @@ def main():
     generator = ArticleGenerator(model=args.model)
     notifier = EmailNotifier()
 
+    # サムネイルジェネレーターを初期化（オプション）
+    thumbnail_generator = None
+    if not args.no_thumbnail:
+        try:
+            thumbnail_generator = ThumbnailGenerator(model=args.thumbnail_model)
+            print(f"サムネイル生成: 有効（{args.thumbnail_model}モデル）")
+        except ValueError as e:
+            print(f"サムネイル生成: 無効（{e}）")
+            thumbnail_generator = None
+
     # パブリッシャーは有料用と無料用で分けて作成（dry-runでない場合）
     publisher_paid = NotePublisher(headless=args.headless, price=args.price) if not args.dry_run else None
     publisher_free = NotePublisher(headless=args.headless, price=0) if not args.dry_run else None
@@ -249,7 +422,8 @@ def main():
             dry_run=args.dry_run,
             article_num=i + 1,
             total=args.count,
-            is_free=is_free
+            is_free=is_free,
+            thumbnail_generator=thumbnail_generator
         )
 
         article_results.append(result)
@@ -275,6 +449,9 @@ def main():
         else:
             print("記事の投稿に失敗しました。")
     print("=" * 50)
+
+    # 生成されたファイルをクリーンアップ（リポジトリを軽く保つため）
+    cleanup_generated_files()
 
     if fail_count > 0:
         sys.exit(1)

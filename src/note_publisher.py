@@ -14,33 +14,38 @@ class NotePublisher:
 
     LOGIN_URL = "https://note.com/login"
     NEW_TEXT_URL = "https://note.com/notes/new"
-    DEFAULT_PRICE = 100  # デフォルト価格（円）
+    DEFAULT_PRICE = 300  # デフォルト価格（円）
     PAID_LINE_MARKER = "===ここから有料==="
 
-    def __init__(self, headless: bool = False, price: int = None):
+    def __init__(self, headless: bool = False, price: int = None, thumbnail_path: str = None):
         """
         Args:
             headless: ブラウザを非表示で実行するか（デバッグ時はFalse推奨）
             price: 有料記事の価格（円）
+            thumbnail_path: サムネイル画像のパス（オプション）
         """
         self.headless = headless
         self.email = os.getenv("NOTE_EMAIL")
         self.password = os.getenv("NOTE_PASSWORD")
         self.price = price if price is not None else self.DEFAULT_PRICE
+        self.thumbnail_path = thumbnail_path
 
         if not self.email or not self.password:
             raise ValueError("NOTE_EMAIL と NOTE_PASSWORD を .env に設定してください")
 
-    def publish(self, article: Article) -> bool:
+    def publish(self, article: Article, thumbnail_path: str = None) -> bool:
         """
         記事を投稿する
 
         Args:
             article: 投稿する記事
+            thumbnail_path: サムネイル画像のパス（指定するとインスタンスの設定を上書き）
 
         Returns:
             成功した場合True
         """
+        # サムネイルパスを決定（引数優先）
+        effective_thumbnail = thumbnail_path or self.thumbnail_path
         with sync_playwright() as p:
             # headlessモードでもボット検出を回避するための設定
             browser = p.chromium.launch(
@@ -74,7 +79,7 @@ class NotePublisher:
                 print("ログイン成功")
 
                 # 記事作成・投稿
-                if not self._create_and_publish(page, article):
+                if not self._create_and_publish(page, article, effective_thumbnail):
                     print("投稿に失敗しました")
                     return False
 
@@ -154,35 +159,31 @@ class NotePublisher:
         """note.com向けにコンテンツを整形"""
         import re
 
+        # HTMLタグを削除
+        content = re.sub(r'<[^>]+>', '', content)
+
+        # マークダウンリンク [text](url) をテキストのみに変換
+        content = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', content)
+
+        # 取り消し線 ~~text~~ を通常テキストに変換
+        content = re.sub(r'~~([^~]+)~~', r'\1', content)
+
         # テーブル形式を箇条書きに変換（もし残っていた場合）
         lines = content.split('\n')
         cleaned_lines = []
         in_code_block = False
-        code_block_content = []
 
         for line in lines:
             # コードブロックの開始/終了を検出
             if line.strip().startswith('```'):
-                if not in_code_block:
-                    # コードブロック開始
-                    in_code_block = True
-                    code_block_content = []
-                    # コードブロックを引用ブロック風に変換（note.comで正しく表示される）
-                    cleaned_lines.append('')
-                    cleaned_lines.append('**【コード例】**')
-                else:
-                    # コードブロック終了
-                    in_code_block = False
-                    # コード内容を引用ブロックとして追加
-                    for code_line in code_block_content:
-                        # 各行を引用形式に変換
-                        cleaned_lines.append(f'> {code_line}' if code_line.strip() else '>')
-                    cleaned_lines.append('')
+                in_code_block = not in_code_block
+                # コードブロックの言語指定を削除（```python → ```）
+                cleaned_lines.append('```')
                 continue
 
             if in_code_block:
                 # コードブロック内はそのまま保持
-                code_block_content.append(line)
+                cleaned_lines.append(line)
                 continue
 
             # テーブルヘッダー区切り行をスキップ
@@ -194,6 +195,10 @@ class NotePublisher:
                 if cells and cells[0]:
                     cleaned_lines.append(f"- {': '.join(cells)}")
                 continue
+
+            # * を - に変換（箇条書き）
+            if re.match(r'^\s*\* ', line):
+                line = re.sub(r'^(\s*)\* ', r'\1- ', line)
 
             cleaned_lines.append(line)
 
@@ -207,6 +212,9 @@ class NotePublisher:
 
         # # 見出しを ## に変換
         content = re.sub(r'^# ([^#])', r'## \1', content, flags=re.MULTILINE)
+
+        # #### 以下の見出しを ### に変換
+        content = re.sub(r'^####+ ', '### ', content, flags=re.MULTILINE)
 
         # 見出しの前に空行を確保
         content = re.sub(r'([^\n])\n(#{2,3} )', r'\1\n\n\2', content)
@@ -233,7 +241,7 @@ class NotePublisher:
         page.keyboard.type(content, delay=delay)
         time.sleep(1)
 
-    def _create_and_publish(self, page: Page, article: Article) -> bool:
+    def _create_and_publish(self, page: Page, article: Article, thumbnail_path: str = None) -> bool:
         """記事を作成して投稿"""
         print("記事作成ページへ移動中...")
 
@@ -317,6 +325,22 @@ class NotePublisher:
         print(f"  記事を入力中... ({len(content)}文字)")
         self._type_content(page, content)
         time.sleep(2)
+
+        # サムネイル画像をアップロード（記事編集画面で行う）
+        # 注意: 失敗しても投稿は継続する
+        if thumbnail_path:
+            print(f"サムネイル画像をアップロード中: {thumbnail_path}")
+            try:
+                success = self._upload_thumbnail(page, thumbnail_path)
+                if not success:
+                    print("  サムネイルは手動で追加してください")
+            except Exception as e:
+                print(f"  サムネイルアップロードをスキップ: {e}")
+
+        # ページを確実に安定させる
+        time.sleep(2)
+        page.evaluate("window.scrollTo(0, 0)")
+        time.sleep(1)
 
         # 「公開に進む」ボタンをクリック
         print("公開設定画面へ移動中...")
@@ -505,6 +529,307 @@ class NotePublisher:
             print(f"価格設定でエラー: {e}")
 
         time.sleep(1)
+
+    def _upload_thumbnail(self, page: Page, thumbnail_path: str) -> bool:
+        """サムネイル画像をアップロード（記事編集画面で実行）"""
+        try:
+            import os
+            if not os.path.exists(thumbnail_path):
+                print(f"  警告: サムネイル画像が見つかりません: {thumbnail_path}")
+                return False
+
+            # ページの一番上にスクロール
+            page.evaluate("window.scrollTo(0, 0)")
+            time.sleep(1)
+
+            # モーダルが開いていたら閉じる（Escキーで閉じる）
+            try:
+                page.keyboard.press("Escape")
+                time.sleep(0.5)
+            except Exception:
+                pass
+
+            print("  見出し画像アイコンを探しています...")
+
+            # 方法1: 見出し画像のコンテナやボタンを直接探す
+            eyecatch_selectors = [
+                # 見出し画像の追加ボタン（アイコン）
+                '[data-testid="eyecatch-button"]',
+                '[aria-label*="見出し"]',
+                '[aria-label*="画像"]',
+                'button[class*="eyecatch"]',
+                'div[class*="eyecatch"] button',
+                'div[class*="Eyecatch"] button',
+                # SVGアイコンを含むボタン
+                '.o-editorEyecatch button',
+                '.o-editorEyecatch__button',
+                # タイトル上部のエリア
+                '[class*="header"] button:has(svg)',
+                '[class*="Header"] button:has(svg)',
+            ]
+
+            icon_clicked = False
+            for selector in eyecatch_selectors:
+                try:
+                    elem = page.locator(selector)
+                    if elem.count() > 0 and elem.first.is_visible(timeout=1000):
+                        print(f"  見出し画像ボタンを発見: {selector}")
+                        elem.first.click()
+                        icon_clicked = True
+                        time.sleep(1)
+                        break
+                except Exception:
+                    continue
+
+            # 方法2: タイトル入力欄の位置を基準に、その上にある要素を探してクリック
+            if not icon_clicked:
+                print("  セレクターで見つからないため、位置ベースで探索...")
+                title_area = page.locator('textarea[placeholder="記事タイトル"]')
+                if title_area.count() > 0:
+                    title_box = title_area.bounding_box()
+                    if title_box:
+                        # タイトルの上にある全てのクリック可能な要素を探す
+                        # JavaScriptを使って要素を取得
+                        elements_info = page.evaluate("""() => {
+                            const title = document.querySelector('textarea[placeholder="記事タイトル"]');
+                            if (!title) return null;
+                            const titleRect = title.getBoundingClientRect();
+
+                            // タイトルより上にある全ての要素
+                            const allElements = document.querySelectorAll('button, [role="button"], div[class*="eyecatch"], div[class*="Eyecatch"], svg');
+                            const results = [];
+
+                            allElements.forEach((el, idx) => {
+                                const rect = el.getBoundingClientRect();
+                                // タイトルより上にある要素
+                                if (rect.bottom < titleRect.top && rect.top > 0) {
+                                    results.push({
+                                        index: idx,
+                                        tag: el.tagName,
+                                        className: el.className,
+                                        x: rect.x + rect.width/2,
+                                        y: rect.y + rect.height/2,
+                                        width: rect.width,
+                                        height: rect.height
+                                    });
+                                }
+                            });
+                            return results;
+                        }""")
+
+                        if elements_info:
+                            print(f"  タイトル上部に{len(elements_info)}個の要素を発見")
+                            for el in elements_info:
+                                print(f"    - {el['tag']}: {el['className'][:50] if el['className'] else 'no class'} at ({el['x']:.0f}, {el['y']:.0f})")
+
+                            # 見出し画像っぽい要素（eyecatch, Eyecatch, header, Header を含む）を優先
+                            for el in elements_info:
+                                class_name = el.get('className', '') or ''
+                                if any(keyword in class_name.lower() for keyword in ['eyecatch', 'header', 'image', 'thumbnail']):
+                                    print(f"  見出し画像要素をクリック: ({el['x']:.0f}, {el['y']:.0f})")
+                                    page.mouse.click(el['x'], el['y'])
+                                    icon_clicked = True
+                                    time.sleep(1)
+                                    break
+
+                            # まだクリックできていなければ、タイトル上部の中央あたりをクリック
+                            if not icon_clicked and elements_info:
+                                # 中央付近の要素を探す
+                                center_x = title_box['x'] + title_box['width'] / 2
+                                closest_el = None
+                                min_dist = float('inf')
+                                for el in elements_info:
+                                    dist = abs(el['x'] - center_x)
+                                    if dist < min_dist:
+                                        min_dist = dist
+                                        closest_el = el
+                                if closest_el:
+                                    print(f"  中央付近の要素をクリック: ({closest_el['x']:.0f}, {closest_el['y']:.0f})")
+                                    page.mouse.click(closest_el['x'], closest_el['y'])
+                                    icon_clicked = True
+                                    time.sleep(1)
+
+            # 方法3: フォールバック - 直接座標でクリック
+            if not icon_clicked:
+                print("  フォールバック: タイトル上部の座標をクリック")
+                title_area = page.locator('textarea[placeholder="記事タイトル"]')
+                if title_area.count() > 0:
+                    title_box = title_area.bounding_box()
+                    if title_box:
+                        # 異なる位置を順番にクリック
+                        positions = [
+                            (title_box['x'] + title_box['width'] / 2, title_box['y'] - 50),
+                            (title_box['x'] + title_box['width'] / 2, title_box['y'] - 80),
+                            (title_box['x'] + title_box['width'] / 2, title_box['y'] - 100),
+                        ]
+                        for x, y in positions:
+                            print(f"  位置をクリック: ({x:.0f}, {y:.0f})")
+                            page.mouse.click(x, y)
+                            time.sleep(0.8)
+                            # メニューが表示されたかチェック
+                            upload_menu = page.locator('text="画像をアップロード"')
+                            if upload_menu.count() > 0 and upload_menu.first.is_visible():
+                                icon_clicked = True
+                                break
+
+            # スクリーンショット保存（デバッグ用）
+            page.screenshot(path="debug_thumbnail_menu.png")
+
+            # Step 2: 「画像をアップロード」メニューをクリック
+            upload_menu = page.locator('text="画像をアップロード"')
+            if upload_menu.count() > 0 and upload_menu.first.is_visible():
+                print("  「画像をアップロード」メニューを発見")
+
+                # ファイル選択ダイアログを待機しながらクリック
+                with page.expect_file_chooser(timeout=10000) as fc_info:
+                    upload_menu.first.click()
+
+                file_chooser = fc_info.value
+                file_chooser.set_files(thumbnail_path)
+                print(f"  ファイルを選択: {thumbnail_path}")
+                time.sleep(2)
+
+                # Step 3: 画角調整画面（CropModal）で「保存」ボタンをクリック
+                page.screenshot(path="debug_thumbnail_crop.png")
+
+                # CropModalが表示されるのを待つ
+                time.sleep(1)
+
+                # CropModal内の保存ボタンを探す（複数の方法で試行）
+                save_clicked = False
+
+                # 方法1: JavaScriptで直接クリック（最も確実）
+                try:
+                    print("  JSでモーダル内の保存ボタンをクリック...")
+                    clicked = page.evaluate("""() => {
+                        // ReactModalPortal内のボタンを探す
+                        const portals = document.querySelectorAll('.ReactModalPortal');
+                        for (const portal of portals) {
+                            const buttons = portal.querySelectorAll('button');
+                            // 「保存」ボタンを探す（「リマインダー」「キャンセル」「保存」の順）
+                            for (const btn of buttons) {
+                                const text = btn.textContent.trim();
+                                if (text === '保存') {
+                                    btn.click();
+                                    return { clicked: true, text: text };
+                                }
+                            }
+                        }
+                        // フォールバック: 全ページで「保存」を含むボタン
+                        const allButtons = document.querySelectorAll('button');
+                        for (const btn of allButtons) {
+                            const text = btn.textContent.trim();
+                            if (text === '保存') {
+                                btn.click();
+                                return { clicked: true, text: text };
+                            }
+                        }
+                        return { clicked: false };
+                    }""")
+                    if clicked and clicked.get('clicked'):
+                        print(f"  「{clicked.get('text', '保存')}」ボタンをクリックしました")
+                        save_clicked = True
+                        time.sleep(2)
+                        print("  サムネイル画像をアップロードしました！")
+                        return True
+                except Exception as e:
+                    print(f"  JSクリックエラー: {e}")
+
+                # 方法2: dispatchEventでクリックイベントを発火
+                if not save_clicked:
+                    try:
+                        print("  dispatchEventで保存ボタンをクリック...")
+                        clicked = page.evaluate("""() => {
+                            const portals = document.querySelectorAll('.ReactModalPortal');
+                            for (const portal of portals) {
+                                const buttons = portal.querySelectorAll('button');
+                                for (const btn of buttons) {
+                                    if (btn.textContent.trim() === '保存') {
+                                        // 複数のイベントを発火
+                                        btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                                        btn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+                                        btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                                        return true;
+                                    }
+                                }
+                            }
+                            return false;
+                        }""")
+                        if clicked:
+                            save_clicked = True
+                            time.sleep(2)
+                            print("  サムネイル画像をアップロードしました！")
+                            return True
+                    except Exception as e:
+                        print(f"  dispatchEventエラー: {e}")
+
+                # 方法3: Playwrightのforce clickでモーダル内ボタンをクリック
+                if not save_clicked:
+                    modal_save_selectors = [
+                        '.ReactModalPortal button:text-is("保存")',
+                        '.ReactModal__Content button:text-is("保存")',
+                        'button:text-is("保存")',
+                    ]
+
+                    for selector in modal_save_selectors:
+                        try:
+                            save_btn = page.locator(selector)
+                            if save_btn.count() > 0:
+                                print(f"  保存ボタンを発見: {selector}")
+                                save_btn.first.click(force=True, timeout=5000)
+                                save_clicked = True
+                                time.sleep(2)
+                                print("  サムネイル画像をアップロードしました！")
+                                return True
+                        except Exception as e:
+                            print(f"  セレクター {selector} でエラー: {e}")
+                            continue
+
+                print("  警告: 保存ボタンのクリックに失敗しました")
+                # モーダルを閉じて続行できるようにする
+                self._close_modal(page)
+                return False
+            else:
+                print("  警告: 「画像をアップロード」メニューが見つかりません")
+                print("  ヒント: note.comのUIが変更された可能性があります。手動でサムネイルを追加してください。")
+                page.screenshot(path="debug_thumbnail_no_menu.png")
+                return False
+
+        except Exception as e:
+            print(f"  サムネイルアップロードエラー: {e}")
+            page.screenshot(path="error_thumbnail_upload.png")
+            # モーダルを閉じて続行できるようにする
+            self._close_modal(page)
+            return False
+
+    def _close_modal(self, page: Page) -> None:
+        """開いているモーダルを閉じる"""
+        try:
+            # Escキーで閉じる
+            page.keyboard.press("Escape")
+            time.sleep(0.5)
+
+            # モーダルの×ボタンを探してクリック
+            close_buttons = [
+                '[class*="Modal"] button[aria-label="Close"]',
+                '[class*="Modal"] button[aria-label="閉じる"]',
+                '.ReactModal__Content button:first-child',
+            ]
+            for selector in close_buttons:
+                try:
+                    btn = page.locator(selector)
+                    if btn.count() > 0 and btn.first.is_visible():
+                        btn.first.click(force=True)
+                        time.sleep(0.5)
+                        break
+                except Exception:
+                    continue
+
+            # もう一度Escキー
+            page.keyboard.press("Escape")
+            time.sleep(0.5)
+        except Exception:
+            pass
 
     def test_login(self) -> bool:
         """ログインのみをテスト"""

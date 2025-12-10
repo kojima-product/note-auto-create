@@ -14,8 +14,10 @@ ENV/
 # Output
 output/
 
-# Screenshots
+# Screenshots and images
 *.png
+*.jpg
+*.jpeg
 
 # IDE
 .idea/

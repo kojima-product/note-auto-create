@@ -19,6 +19,15 @@ on:
         description: '無料記事の割合 (0.0-1.0)'
         required: false
         default: '0.8'
+      no_thumbnail:
+        description: 'サムネイル生成を無効化'
+        required: false
+        default: false
+        type: boolean
+      thumbnail_model:
+        description: 'サムネイルモデル (flash/pro)'
+        required: false
+        default: 'pro'
 
 permissions:
   contents: write  # リポジトリへの書き込み権限
@@ -66,14 +75,23 @@ jobs:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           USE_MODEL: ${{ github.event.inputs.model || 'sonnet' }}
         run: |
+          THUMBNAIL_FLAGS=""
+          if [ "${{ github.event.inputs.no_thumbnail }}" = "true" ]; then
+            THUMBNAIL_FLAGS="--no-thumbnail"
+          else
+            THUMBNAIL_FLAGS="--thumbnail-model ${{ github.event.inputs.thumbnail_model || 'pro' }}"
+          fi
+
           python -m src.main \
             --headless \
             --count ${{ github.event.inputs.count || '5' }} \
             --interval 3600 \
             --model ${{ github.event.inputs.model || 'sonnet' }} \
-            --free-ratio ${{ github.event.inputs.free_ratio || '0.8' }}
+            --free-ratio ${{ github.event.inputs.free_ratio || '0.8' }} \
+            $THUMBNAIL_FLAGS
 
       - name: Upload generated articles
         uses: actions/upload-artifact@v4
@@ -99,6 +117,12 @@ jobs:
         with:
           path: data/posted_topics.json
           key: posted-topics-${{ github.run_id }}
+
+      - name: Cleanup generated files
+        if: always()
+        run: |
+          rm -rf output/*.md output/thumbnails/* debug_*.png error_*.png *.png *.jpg 2>/dev/null || true
+          echo "Generated files cleaned up"
 
       - name: Commit posted topics data
         if: success()
