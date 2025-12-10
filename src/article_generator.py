@@ -147,9 +147,6 @@ class ArticleGenerator:
 ---TAGS---
 [カンマ区切りのハッシュタグ（5〜8個、#なしで記載）]
 例: AI,ChatGPT,LLM,機械学習,テクノロジー,OpenAI,プログラミング,Python
----THUMBNAIL_PROMPT---
-[サムネイル画像生成用の英語プロンプト（Google Whisk用）]
-例: A developer working with futuristic holographic code, digital art style, blue and purple tones
 ---CONTENT---
 [記事本文（マークダウン形式、必ず「===ここから有料===」の行を含める）]
 
@@ -158,7 +155,7 @@ class ArticleGenerator:
 - 見出しは ## または ### を使用（# は使わない）
 - 段落間は1行空けるだけ（複数の空行は入れない）
 - 箇条書きは - を使用し、項目間に空行を入れない
-- 太字は **テキスト** 形式で使用OK
+- 太字は **テキスト** 形式で使用OK（重要: **の直後・直前にスペースを入れないこと。「** テキスト **」はNG、「**テキスト**」が正解）
 - コードブロックは ``` のみ使用（言語指定なし、```python などは使わない）
 - インラインコードは `コード` 形式で使用OK
 - コードブロックは短めに（10行以内を推奨）
@@ -223,9 +220,6 @@ class ArticleGenerator:
 ---TAGS---
 [カンマ区切りのハッシュタグ（5〜8個、#なしで記載）]
 例: AI,ChatGPT,LLM,機械学習,テクノロジー,OpenAI,プログラミング,Python
----THUMBNAIL_PROMPT---
-[サムネイル画像生成用の英語プロンプト（Google Whisk用）]
-例: A developer working with futuristic holographic code, digital art style, blue and purple tones
 ---CONTENT---
 [記事本文（マークダウン形式）]
 
@@ -234,7 +228,7 @@ class ArticleGenerator:
 - 見出しは ## または ### を使用（# は使わない）
 - 段落間は1行空けるだけ（複数の空行は入れない）
 - 箇条書きは - を使用し、項目間に空行を入れない
-- 太字は **テキスト** 形式で使用OK
+- 太字は **テキスト** 形式で使用OK（重要: **の直後・直前にスペースを入れないこと。「** テキスト **」はNG、「**テキスト**」が正解）
 - コードブロックは ``` のみ使用（言語指定なし、```python などは使わない）
 - インラインコードは `コード` 形式で使用OK
 - コードブロックは短めに（10行以内を推奨）
@@ -251,7 +245,7 @@ class ArticleGenerator:
         """レスポンスをタイトル、タグ、サムネイルプロンプト、本文に分離"""
         title = ""
         tags = []
-        thumbnail_prompt = ""
+        thumbnail_prompt = ""  # 未使用だが互換性のため維持
         content = ""
 
         if "---TITLE---" in raw and "---CONTENT---" in raw:
@@ -262,21 +256,11 @@ class ArticleGenerator:
             # タグ部分を抽出
             if "---TAGS---" in raw:
                 after_tags = raw.split("---TAGS---")[1]
-                if "---THUMBNAIL_PROMPT---" in after_tags:
-                    tags_part = after_tags.split("---THUMBNAIL_PROMPT---")[0].strip()
-                elif "---CONTENT---" in after_tags:
+                if "---CONTENT---" in after_tags:
                     tags_part = after_tags.split("---CONTENT---")[0].strip()
                 else:
                     tags_part = after_tags.strip()
                 tags = [t.strip().replace("#", "") for t in tags_part.split(",") if t.strip()]
-
-            # サムネイルプロンプト部分を抽出
-            if "---THUMBNAIL_PROMPT---" in raw:
-                after_thumbnail = raw.split("---THUMBNAIL_PROMPT---")[1]
-                if "---CONTENT---" in after_thumbnail:
-                    thumbnail_prompt = after_thumbnail.split("---CONTENT---")[0].strip()
-                else:
-                    thumbnail_prompt = after_thumbnail.strip()
 
             # コンテンツ部分を抽出
             if "---CONTENT---" in raw:
@@ -288,7 +272,29 @@ class ArticleGenerator:
             title = lines[0].replace("#", "").strip()
             content = "\n".join(lines[1:]).strip()
 
+        # マークダウンの太字のスペースを修正（noteで表示されるように）
+        content = self._fix_markdown_bold(content)
+
         return title, tags, thumbnail_prompt, content
+
+    def _fix_markdown_bold(self, text: str) -> str:
+        """マークダウンの太字記法のスペース問題を修正
+
+        noteでは「** テキスト **」のように**の内側にスペースがあると
+        太字として認識されないため、スペースを除去する
+        """
+        import re
+        # パターン: ** の後にスペース、または ** の前にスペース
+        # 例: "** テキスト **" → "**テキスト**"
+        # 例: "**テキスト **" → "**テキスト**"
+        # 例: "** テキスト**" → "**テキスト**"
+
+        # **の後のスペースを除去
+        text = re.sub(r'\*\*\s+', '**', text)
+        # **の前のスペースを除去
+        text = re.sub(r'\s+\*\*', '**', text)
+
+        return text
 
 
 if __name__ == "__main__":
