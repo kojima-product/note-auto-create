@@ -146,6 +146,80 @@ class WebSearcher:
         all_results.sort(key=lambda x: x.score, reverse=True)
         return all_results
 
+    def search_custom_topic(self, topic: str, max_results: int = 10) -> list[SearchResult]:
+        """カスタムトピックで詳細検索（記事作成用に最新情報を収集）
+
+        Args:
+            topic: ユーザーが指定したトピック（例: "Claude 4.5 Sonnet", "Python 3.13"）
+            max_results: 取得する最大結果数
+
+        Returns:
+            検索結果のリスト（最新かつ関連性の高いものから）
+        """
+        if not self.enabled:
+            print("警告: TAVILY_API_KEYが設定されていないため、カスタムトピック検索は無効です")
+            return []
+
+        try:
+            from tavily import TavilyClient
+        except ImportError:
+            print("警告: tavilyパッケージがインストールされていません")
+            return []
+
+        # 現在の年月を取得
+        from datetime import datetime
+        now = datetime.now()
+        current_year = now.year
+        current_month = now.month
+
+        # 複数のクエリで検索して最新情報を収集
+        queries = [
+            f"{topic} 最新ニュース {current_year}年{current_month}月",
+            f"{topic} 新機能 発表 {current_year}",
+            f"{topic} latest news {current_year}",
+        ]
+
+        all_results = []
+        seen_urls = set()
+
+        print(f"カスタムトピック検索中: {topic}")
+        client = TavilyClient(api_key=self.tavily_api_key)
+
+        for query in queries:
+            try:
+                print(f"  検索: {query}")
+                response = client.search(
+                    query=query,
+                    search_depth="advanced",  # より詳細な検索
+                    max_results=max_results // len(queries) + 2,
+                    include_answer=True,
+                    include_raw_content=True,  # より詳細なコンテンツを取得
+                    days=7,  # 過去7日間（カスタム検索は少し広めに）
+                )
+
+                for item in response.get("results", []):
+                    url = item.get("url", "")
+                    if url and url not in seen_urls:
+                        seen_urls.add(url)
+                        result = SearchResult(
+                            title=item.get("title", ""),
+                            url=url,
+                            content=item.get("content", "")[:1000],  # より多くのコンテンツ
+                            score=item.get("score", 0.0),
+                            published_date=item.get("published_date"),
+                        )
+                        all_results.append(result)
+
+            except Exception as e:
+                print(f"  検索エラー ({query}): {e}")
+                continue
+
+        # スコアでソート
+        all_results.sort(key=lambda x: x.score, reverse=True)
+        print(f"  合計 {len(all_results)} 件の結果を取得")
+
+        return all_results[:max_results]
+
 
 if __name__ == "__main__":
     # テスト実行

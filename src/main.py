@@ -12,12 +12,13 @@ from datetime import datetime
 # プロジェクトルートをパスに追加
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.topic_collector import TopicCollector
+from src.topic_collector import TopicCollector, Topic
 from src.article_generator import ArticleGenerator
 from src.note_publisher import NotePublisher
 from src.posted_tracker import PostedTracker
 from src.email_notifier import EmailNotifier
 from src.thumbnail_generator import ThumbnailGenerator
+from src.web_searcher import WebSearcher
 
 
 def cleanup_generated_files():
@@ -56,6 +57,61 @@ def cleanup_generated_files():
         print(f"クリーンアップ: {deleted_count}件のファイルを削除しました")
 
 
+def create_custom_topic(custom_topic: str) -> Topic:
+    """カスタムトピックからTopicオブジェクトを作成
+
+    Args:
+        custom_topic: ユーザーが指定したトピック
+
+    Returns:
+        Topic: 作成されたトピックオブジェクト
+    """
+    from datetime import timezone
+
+    # Web検索でカスタムトピックについて情報収集
+    searcher = WebSearcher()
+    search_results = searcher.search_custom_topic(custom_topic, max_results=10)
+
+    # 検索結果を集約してサマリーを作成
+    summary_parts = []
+    source_urls = []
+    for result in search_results[:5]:  # 上位5件の情報を使用
+        summary_parts.append(f"- {result.title}: {result.content[:200]}")
+        source_urls.append(result.url)
+
+    if summary_parts:
+        summary = "\n".join(summary_parts)
+        primary_url = source_urls[0] if source_urls else ""
+    else:
+        summary = f"「{custom_topic}」についての最新情報"
+        primary_url = ""
+
+    # カテゴリを推定
+    category = "tech"  # デフォルト
+    topic_lower = custom_topic.lower()
+    if any(kw in topic_lower for kw in ["ai", "llm", "gpt", "claude", "gemini", "機械学習", "生成ai"]):
+        category = "ai"
+    elif any(kw in topic_lower for kw in ["python", "javascript", "rust", "go", "react", "next"]):
+        category = "programming"
+    elif any(kw in topic_lower for kw in ["aws", "azure", "gcp", "docker", "kubernetes"]):
+        category = "devops"
+    elif any(kw in topic_lower for kw in ["セキュリティ", "脆弱性", "security"]):
+        category = "security"
+
+    topic = Topic(
+        title=custom_topic,
+        link=primary_url,
+        summary=summary,
+        published=datetime.now(timezone.utc),
+        source="カスタムトピック",
+        category=category,
+        language="ja",
+        score=100.0,  # カスタムトピックは最優先
+    )
+
+    return topic
+
+
 def create_single_article(
     collector: TopicCollector,
     generator: ArticleGenerator,
@@ -67,7 +123,8 @@ def create_single_article(
     article_num: int = 1,
     total: int = 1,
     is_free: bool = False,
-    thumbnail_generator: ThumbnailGenerator = None
+    thumbnail_generator: ThumbnailGenerator = None,
+    custom_topic: str = None
 ) -> dict:
     """1つの記事を作成して投稿。結果をdictで返す"""
     prefix = f"[{article_num}/{total}] " if total > 1 else ""
@@ -75,9 +132,15 @@ def create_single_article(
     result = {"success": False, "title": "", "error": None, "is_free": is_free}
 
     # Step 1: トピック収集
-    print(f"\n{prefix}[Step 1/3] トピックを収集中...")
-    posted_urls = tracker.get_posted_urls()
-    topic = collector.select_best_topic(exclude_urls=posted_urls, tracker=tracker)
+    if custom_topic:
+        # カスタムトピックが指定された場合
+        print(f"\n{prefix}[Step 1/3] カスタムトピックを処理中: {custom_topic}")
+        topic = create_custom_topic(custom_topic)
+    else:
+        # 通常のトピック収集
+        print(f"\n{prefix}[Step 1/3] トピックを収集中...")
+        posted_urls = tracker.get_posted_urls()
+        topic = collector.select_best_topic(exclude_urls=posted_urls, tracker=tracker)
 
     if not topic:
         print(f"{prefix}エラー: 未投稿のトピックが見つかりませんでした")
@@ -306,6 +369,12 @@ def main():
         help="Web検索を無効にし、RSSフィードのみ使用"
     )
     parser.add_argument(
+        "--custom-topic",
+        type=str,
+        default=os.getenv("CUSTOM_TOPIC", ""),
+        help="カスタムトピック（指定するとこの内容でWeb検索して記事を作成）。環境変数CUSTOM_TOPICでも指定可能"
+    )
+    parser.add_argument(
         "--count",
         type=int,
         default=1,
@@ -371,6 +440,21 @@ def main():
     if posted_count > 0:
         print(f"（投稿済み: {posted_count}件）")
 
+    # カスタムトピックの処理（空文字列をNoneに変換）
+    custom_topic = args.custom_topic.strip() if args.custom_topic else None
+    if custom_topic == "":
+        custom_topic = None
+
+    # カスタムトピックモードの表示
+    if custom_topic:
+        print(f"\n【カスタムトピックモード】")
+        print(f"  トピック: {custom_topic}")
+        print(f"  ※指定されたトピックについてWeb検索し、記事を作成します")
+        # カスタムトピックの場合は1記事のみに制限（同じ内容の記事を複数作る意味がない）
+        if args.count > 1:
+            print(f"  ※カスタムトピック指定時は1記事のみ作成します")
+            args.count = 1
+
     if args.count > 1:
         print(f"\n{args.count}件の記事を作成します（間隔: {args.interval}秒）")
 
@@ -423,7 +507,8 @@ def main():
             article_num=i + 1,
             total=args.count,
             is_free=is_free,
-            thumbnail_generator=thumbnail_generator
+            thumbnail_generator=thumbnail_generator,
+            custom_topic=custom_topic
         )
 
         article_results.append(result)

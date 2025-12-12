@@ -1,6 +1,7 @@
 """記事生成モジュール - Anthropic APIを使用して記事を生成"""
 
 import os
+from datetime import datetime
 import anthropic
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -34,8 +35,20 @@ class ArticleGenerator:
         self.model = self.MODELS.get(model_key, self.MODELS["haiku"])
         print(f"使用モデル: {self.model}")
 
-    SYSTEM_PROMPT = """あなたはテクノロジー分野で大人気の技術ブロガー兼エンジニアライターです。
+    def _get_system_prompt(self) -> str:
+        """現在の日付を含むシステムプロンプトを生成"""
+        now = datetime.now()
+        current_date = f"{now.year}年{now.month}月{now.day}日"
+        current_year_month = f"{now.year}年{now.month}月"
+
+        return f"""あなたはテクノロジー分野で大人気の技術ブロガー兼エンジニアライターです。
 読者から「この人の記事は100円払う価値がある！」と言われる記事を書くことで有名です。
+
+【重要：本日は{current_date}です】
+- 必ず{current_year_month}時点の最新情報として記事を書いてください
+- 古いバージョンや過去の情報を使わないでください
+- 例：Claude 4.5が最新なのにClaude 4.1の話をしない、Python 3.13が最新なのに3.11の話をしない
+- トピックについて不確かな場合は「〜と考えられます」「〜の可能性があります」と明記してください
 
 【得意分野】
 - AI・機械学習（ChatGPT, Claude, LLM全般）
@@ -62,7 +75,7 @@ class ArticleGenerator:
 - 「これ、ヤバくないですか？」「個人的に超アツい」など感情を表現
 
 【絶対に守ること】
-- 2025年12月現在の最新情報として書く（古い情報は使わない）
+- {current_year_month}現在の最新情報として書く（古い情報は絶対に使わない）
 - 100円の価値を感じさせる「ここでしか読めない視点」を必ず入れる
 - 読み終わった後「読んでよかった！」と思わせる満足感を提供する"""
 
@@ -79,7 +92,7 @@ class ArticleGenerator:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=8192,
-            system=self.SYSTEM_PROMPT,
+            system=self._get_system_prompt(),
             messages=[
                 {"role": "user", "content": prompt}
             ]
@@ -95,6 +108,10 @@ class ArticleGenerator:
 
     def _build_prompt(self, topic: Topic) -> str:
         """記事生成用のプロンプトを構築"""
+        now = datetime.now()
+        current_date = f"{now.year}年{now.month}月{now.day}日"
+        current_year_month = f"{now.year}年{now.month}月"
+
         # カテゴリに応じた追加指示
         category_hints = {
             "ai": "AI・機械学習の最新動向として、実務での活用方法や今後の展望を含めてください。",
@@ -109,7 +126,12 @@ class ArticleGenerator:
         category_hint = category_hints.get(topic.category, category_hints["tech"])
 
         return f"""以下のトピックについて、note.comに投稿する有料記事を日本語で作成してください。
-※重要: 現在は2025年12月です。この時点での最新情報として記事を書いてください。
+
+【重要な注意事項】
+- 本日は{current_date}です。必ず{current_year_month}時点の最新情報として記事を書いてください。
+- 古いバージョンや過去のモデルの話をしないでください。
+- トピックの概要に含まれる情報が最新です。それを基に記事を書いてください。
+- 不確かな情報は「〜と考えられます」「〜の可能性があります」と明記してください。
 
 ## トピック情報
 - タイトル: {topic.title}
@@ -194,6 +216,10 @@ class ArticleGenerator:
 
     def _build_prompt_free(self, topic: Topic) -> str:
         """無料記事生成用のプロンプトを構築"""
+        now = datetime.now()
+        current_date = f"{now.year}年{now.month}月{now.day}日"
+        current_year_month = f"{now.year}年{now.month}月"
+
         # カテゴリに応じた追加指示
         category_hints = {
             "ai": "AI・機械学習の最新動向として、実務での活用方法や今後の展望を含めてください。",
@@ -208,7 +234,12 @@ class ArticleGenerator:
         category_hint = category_hints.get(topic.category, category_hints["tech"])
 
         return f"""以下のトピックについて、note.comに投稿する**無料記事**を日本語で作成してください。
-※重要: 現在は2025年12月です。この時点での最新情報として記事を書いてください。
+
+【重要な注意事項】
+- 本日は{current_date}です。必ず{current_year_month}時点の最新情報として記事を書いてください。
+- 古いバージョンや過去のモデルの話をしないでください。
+- トピックの概要に含まれる情報が最新です。それを基に記事を書いてください。
+- 不確かな情報は「〜と考えられます」「〜の可能性があります」と明記してください。
 
 ## トピック情報
 - タイトル: {topic.title}

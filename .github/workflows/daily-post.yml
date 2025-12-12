@@ -7,6 +7,11 @@ on:
   # 手動実行も可能
   workflow_dispatch:
     inputs:
+      custom_topic:
+        description: 'カスタムトピック（指定するとこの内容でWeb検索して記事を作成）'
+        required: false
+        default: ''
+        type: string
       count:
         description: '作成する記事の数'
         required: false
@@ -77,6 +82,7 @@ jobs:
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           USE_MODEL: ${{ github.event.inputs.model || 'sonnet' }}
+          CUSTOM_TOPIC: ${{ github.event.inputs.custom_topic }}
         run: |
           THUMBNAIL_FLAGS=""
           if [ "${{ github.event.inputs.no_thumbnail }}" = "true" ]; then
