@@ -357,6 +357,9 @@ class NotePublisher:
         if is_paid_article:
             print(f"有料設定中: {self.price}円")
             self._set_paid_article(page, self.price)
+
+            # メンバーシップのプラン限定公開を設定
+            self._set_membership_plan_restriction(page)
         else:
             print("無料記事として投稿します")
 
@@ -529,6 +532,192 @@ class NotePublisher:
             print(f"価格設定でエラー: {e}")
 
         time.sleep(1)
+
+    def _set_membership_plan_restriction(self, page: Page) -> bool:
+        """メンバーシップのプラン限定公開を設定"""
+        try:
+            print("メンバーシップのプラン限定公開を設定中...")
+            time.sleep(1)
+
+            # スクリーンショットを保存（デバッグ用）
+            page.screenshot(path="debug_before_membership.png")
+
+            # ページをスクロールして全体を読み込む
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            time.sleep(0.5)
+            page.evaluate("window.scrollTo(0, 0)")
+            time.sleep(0.5)
+
+            # 方法1: 「プラン限定公開」テキストを探してクリック
+            plan_selectors = [
+                'text="プラン限定公開"',
+                'text="プラン限定"',
+                ':text("プラン限定公開")',
+            ]
+
+            for selector in plan_selectors:
+                try:
+                    elem = page.locator(selector).first
+                    if elem.is_visible(timeout=2000):
+                        print(f"  「プラン限定公開」を発見: {selector}")
+                        # 近くの追加ボタンを探す
+                        # まずは要素をスクロールして表示
+                        elem.scroll_into_view_if_needed()
+                        time.sleep(0.3)
+
+                        # 親要素内の「追加」ボタンを探す
+                        parent_add_button = self._find_add_button_near_element(page, elem)
+                        if parent_add_button:
+                            parent_add_button.click()
+                            print("  プラン限定公開の「追加」ボタンをクリック")
+                            time.sleep(1)
+                            page.screenshot(path="debug_after_membership.png")
+                            return True
+                except Exception:
+                    continue
+
+            # 方法2: メンバーシップセクションを探す
+            membership_selectors = [
+                'text="メンバーシップ"',
+                ':text("メンバーシップ")',
+                '[class*="membership"]',
+                '[class*="Membership"]',
+            ]
+
+            for selector in membership_selectors:
+                try:
+                    elem = page.locator(selector).first
+                    if elem.is_visible(timeout=2000):
+                        print(f"  メンバーシップセクションを発見: {selector}")
+                        elem.scroll_into_view_if_needed()
+                        time.sleep(0.3)
+
+                        # このセクション内の「追加」ボタンを探す
+                        parent_add_button = self._find_add_button_near_element(page, elem)
+                        if parent_add_button:
+                            parent_add_button.click()
+                            print("  メンバーシップの「追加」ボタンをクリック")
+                            time.sleep(1)
+                            page.screenshot(path="debug_after_membership.png")
+                            return True
+                except Exception:
+                    continue
+
+            # 方法3: JavaScriptで直接探す
+            clicked = page.evaluate("""() => {
+                // 「プラン限定公開」を含む要素を探す
+                const allElements = document.querySelectorAll('*');
+                for (const el of allElements) {
+                    const text = el.textContent || '';
+                    if (text.includes('プラン限定公開') && el.children.length < 5) {
+                        // 近くの「追加」ボタンを探す
+                        let parent = el.parentElement;
+                        for (let i = 0; i < 5 && parent; i++) {
+                            const buttons = parent.querySelectorAll('button');
+                            for (const btn of buttons) {
+                                if (btn.textContent.trim() === '追加') {
+                                    btn.click();
+                                    return { success: true, method: 'plan_text' };
+                                }
+                            }
+                            parent = parent.parentElement;
+                        }
+                    }
+                }
+
+                // 「メンバーシップ」セクション内の「追加」ボタンを探す
+                for (const el of allElements) {
+                    const text = el.textContent || '';
+                    if (text.includes('メンバーシップ') && !text.includes('メンバーシップに') && el.children.length < 10) {
+                        let parent = el.parentElement;
+                        for (let i = 0; i < 5 && parent; i++) {
+                            const buttons = parent.querySelectorAll('button');
+                            for (const btn of buttons) {
+                                if (btn.textContent.trim() === '追加') {
+                                    btn.click();
+                                    return { success: true, method: 'membership_section' };
+                                }
+                            }
+                            parent = parent.parentElement;
+                        }
+                    }
+                }
+
+                return { success: false };
+            }""")
+
+            if clicked and clicked.get('success'):
+                print(f"  JSで追加ボタンをクリック (method: {clicked.get('method')})")
+                time.sleep(1)
+                page.screenshot(path="debug_after_membership.png")
+                return True
+
+            print("  警告: プラン限定公開の設定が見つかりませんでした")
+            page.screenshot(path="debug_membership_not_found.png")
+            return False
+
+        except Exception as e:
+            print(f"  プラン限定公開設定でエラー: {e}")
+            page.screenshot(path="error_membership_setting.png")
+            return False
+
+    def _find_add_button_near_element(self, page: Page, element) -> any:
+        """指定された要素の近くにある「追加」ボタンを探す"""
+        try:
+            elem_box = element.bounding_box()
+            if not elem_box:
+                return None
+
+            # 同じ行または近くにある「追加」ボタンを探す
+            add_buttons = page.locator('button:has-text("追加")').all()
+
+            for btn in add_buttons:
+                try:
+                    btn_box = btn.bounding_box()
+                    if btn_box:
+                        # Y座標が近い（同じ行付近）ボタンを探す
+                        y_diff = abs(elem_box['y'] - btn_box['y'])
+                        if y_diff < 50:  # 50px以内
+                            return btn
+                except Exception:
+                    continue
+
+            # フォールバック: 親要素を辿って「追加」ボタンを探す
+            parent_info = page.evaluate("""(elemBox) => {
+                const allButtons = document.querySelectorAll('button');
+                for (const btn of allButtons) {
+                    if (btn.textContent.trim() === '追加') {
+                        const btnRect = btn.getBoundingClientRect();
+                        const yDiff = Math.abs(elemBox.y - btnRect.y);
+                        if (yDiff < 100) {
+                            return {
+                                found: true,
+                                x: btnRect.x + btnRect.width / 2,
+                                y: btnRect.y + btnRect.height / 2
+                            };
+                        }
+                    }
+                }
+                return { found: false };
+            }""", elem_box)
+
+            if parent_info and parent_info.get('found'):
+                # 座標でクリックするためのプロキシオブジェクトを返す
+                class CoordButton:
+                    def __init__(self, page, x, y):
+                        self._page = page
+                        self._x = x
+                        self._y = y
+
+                    def click(self):
+                        self._page.mouse.click(self._x, self._y)
+
+                return CoordButton(page, parent_info['x'], parent_info['y'])
+
+        except Exception:
+            pass
+
+        return None
 
     def _upload_thumbnail(self, page: Page, thumbnail_path: str) -> bool:
         """サムネイル画像をアップロード（記事編集画面で実行）"""
