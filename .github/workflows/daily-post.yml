@@ -23,7 +23,7 @@ on:
       free_ratio:
         description: '無料記事の割合 (0.0-1.0)'
         required: false
-        default: '0.8'
+        default: '0.2'
       no_thumbnail:
         description: 'サムネイル生成を無効化'
         required: false
@@ -96,7 +96,7 @@ jobs:
             --count ${{ github.event.inputs.count || '5' }} \
             --interval 3600 \
             --model ${{ github.event.inputs.model || 'sonnet' }} \
-            --free-ratio ${{ github.event.inputs.free_ratio || '0.8' }} \
+            --free-ratio ${{ github.event.inputs.free_ratio || '0.2' }} \
             $THUMBNAIL_FLAGS
 
       - name: Upload generated articles
