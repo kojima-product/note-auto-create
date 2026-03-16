@@ -178,48 +178,68 @@ class ThumbnailGenerator:
         return self.generate(prompt)
 
     def _create_japanese_prompt(self, title: str, tags: List[str] = None) -> str:
-        """日本語タイトルからプロフェッショナルなテックブログサムネイルを生成"""
-        # Determine visual theme from tags/title
+        """日本語タイトルからブランド統一サムネイルを生成
+
+        戦略:
+        - 統一レイアウト: ダーク背景 + 左側にトピック具体ビジュアル + 右側に余白（タイトルオーバーレイ用）
+        - トピック具体性: 抽象アイコンではなく、記事内容を連想させるリアルなモチーフ
+        - ブランド認知: 毎回同じカラートーン（ダークブルー系）でシリーズ感を出す
+        """
         tag_lower = ' '.join(tags[:5]).lower() if tags else ''
         title_lower = title.lower()
         combined = title_lower + ' ' + tag_lower
 
-        # Select abstract icon based on topic
-        if any(kw in combined for kw in ['ai', '機械学習', 'llm', 'chatgpt', 'claude', 'gpt', '生成ai']):
-            icon_desc = "a stylized brain with glowing neural circuit traces"
-            gradient = "deep indigo to electric purple"
-        elif any(kw in combined for kw in ['セキュリティ', 'security', '脆弱性', '攻撃', 'hack']):
-            icon_desc = "a minimalist shield icon with a geometric lock symbol"
-            gradient = "dark navy to teal"
-        elif any(kw in combined for kw in ['python', 'javascript', 'rust', 'go', 'プログラミング', 'コード']):
-            icon_desc = "abstract code brackets < /> with flowing geometric lines"
-            gradient = "midnight blue to cyan"
-        elif any(kw in combined for kw in ['cloud', 'aws', 'docker', 'kubernetes', 'devops', 'クラウド']):
-            icon_desc = "abstract cloud shapes connected by glowing network nodes"
-            gradient = "dark teal to sky blue"
-        elif any(kw in combined for kw in ['web', 'react', 'next', 'フロントエンド', 'api']):
-            icon_desc = "interconnected geometric shapes representing web architecture"
-            gradient = "deep blue to vibrant cyan"
+        # Select concrete, topic-specific visual (not abstract icons)
+        if any(kw in combined for kw in ['ai', '機械学習', 'llm', 'chatgpt', 'claude', 'gpt', '生成ai', 'anthropic', 'openai']):
+            scene = "a photorealistic laptop screen showing a glowing AI chat interface with streaming text responses, surrounded by floating holographic data visualizations"
+            accent = "purple and cyan neon accents"
+        elif any(kw in combined for kw in ['セキュリティ', 'security', '脆弱性', '攻撃', 'hack', '暗号']):
+            scene = "a photorealistic dark terminal screen with green matrix-style code, a prominent padlock hologram floating above a circuit board"
+            accent = "green and red warning accents"
+        elif any(kw in combined for kw in ['python', 'javascript', 'rust', 'go', 'プログラミング', 'コード', 'typescript']):
+            scene = "a photorealistic code editor (dark theme) with syntax-highlighted code, multiple open tabs, and a glowing cursor mid-line"
+            accent = "warm orange and blue syntax highlighting glow"
+        elif any(kw in combined for kw in ['cloud', 'aws', 'docker', 'kubernetes', 'devops', 'クラウド', 'インフラ']):
+            scene = "a photorealistic 3D server rack room with glowing blue LED lights, holographic cloud architecture diagrams floating above"
+            accent = "cool blue and white LED glow"
+        elif any(kw in combined for kw in ['web', 'react', 'next', 'フロントエンド', 'api', 'ブラウザ']):
+            scene = "a photorealistic browser window showing a sleek modern web application UI with layered component panels floating in 3D space"
+            accent = "vibrant blue and white interface glow"
+        elif any(kw in combined for kw in ['半導体', 'chip', 'gpu', 'cpu', 'ハードウェア', 'quantum', '量子']):
+            scene = "a photorealistic extreme close-up of a glowing microchip on a circuit board, with visible trace lines radiating outward"
+            accent = "golden traces and blue silicon glow"
+        elif any(kw in combined for kw in ['スタートアップ', '資金調達', 'ビジネス', '買収', 'ipo']):
+            scene = "a photorealistic upward-trending holographic stock chart floating above a modern glass office desk with a laptop"
+            accent = "green growth indicators and blue data lines"
         else:
-            icon_desc = "abstract geometric tech pattern with connected nodes and lines"
-            gradient = "deep blue-purple to electric blue"
+            scene = "a photorealistic futuristic tech workspace with multiple holographic screens showing data dashboards and code"
+            accent = "blue and purple holographic glow"
 
-        prompt = f"""Create a professional tech blog header image for an article titled: "{title}".
+        prompt = f"""Generate a premium tech blog thumbnail image.
 
-Visual design:
-- Background: smooth {gradient} gradient, subtle mesh or noise texture for depth
-- Center element: {icon_desc}, rendered in a clean minimalist style with soft glow effects
-- Accent: thin geometric lines or subtle dot grid pattern in the background
-- Lighting: soft ambient glow emanating from the central icon
+SCENE: {scene}
+
+COMPOSITION:
+- Dark background (deep navy/charcoal #0a1628) for the entire image
+- Main visual element positioned in the center-left area
+- Right third of image is darker/emptier (note.com overlays article title here)
+- Cinematic depth of field: sharp focal point with soft bokeh background
+- {accent}
+
+BRAND STYLE (consistent across all thumbnails):
+- Color palette: always dark navy base (#0a1628) with colored accents
+- Photorealistic 3D render style, NOT flat illustration
+- Cinematic lighting with strong rim light from behind
+- Subtle lens flare or light leak for premium feel
+- Slight vignette darkening at edges
 
 STRICT RULES:
-- ABSOLUTELY NO text, letters, numbers, or words anywhere in the image
-- NO cartoon characters, NO manga/anime style, NO speech bubbles, NO comic panels
-- NO human faces or figures
-- Style: clean, minimal, premium — like a header image for a tech publication (Wired, TechCrunch, Verge)
-- Mood: futuristic, sophisticated, trustworthy
+- ABSOLUTELY NO text, letters, numbers, words, or watermarks
+- NO cartoon, manga, anime, or illustrated style
+- NO human faces or hands
+- Photorealistic or 3D render quality only
 
-Dimensions: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT} pixels, landscape 1.91:1 aspect ratio."""
+Dimensions: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT} pixels, landscape 1.91:1."""
 
         return prompt
 
