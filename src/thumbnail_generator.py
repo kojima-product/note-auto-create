@@ -178,53 +178,32 @@ class ThumbnailGenerator:
         return self.generate(prompt)
 
     def _create_japanese_prompt(self, title: str, tags: List[str] = None) -> str:
-        """日本語タイトルからブランド統一サムネイルを生成
+        """タイトル内容に沿ったブランド統一サムネイルを生成
 
         戦略:
-        - 統一レイアウト: ダーク背景 + 左側にトピック具体ビジュアル + 右側に余白（タイトルオーバーレイ用）
-        - トピック具体性: 抽象アイコンではなく、記事内容を連想させるリアルなモチーフ
-        - ブランド認知: 毎回同じカラートーン（ダークブルー系）でシリーズ感を出す
+        - タイトルをそのままGeminiに渡し、内容に最適なシーンを生成させる
+        - ブランドテンプレート（ダーク背景・シネマティック照明）で統一感を維持
         """
-        tag_lower = ' '.join(tags[:5]).lower() if tags else ''
-        title_lower = title.lower()
-        combined = title_lower + ' ' + tag_lower
+        tag_str = ', '.join(tags[:5]) if tags else ''
 
-        # Select concrete, topic-specific visual (not abstract icons)
-        if any(kw in combined for kw in ['ai', '機械学習', 'llm', 'chatgpt', 'claude', 'gpt', '生成ai', 'anthropic', 'openai']):
-            scene = "a photorealistic laptop screen showing a glowing AI chat interface with streaming text responses, surrounded by floating holographic data visualizations"
-            accent = "purple and cyan neon accents"
-        elif any(kw in combined for kw in ['セキュリティ', 'security', '脆弱性', '攻撃', 'hack', '暗号']):
-            scene = "a photorealistic dark terminal screen with green matrix-style code, a prominent padlock hologram floating above a circuit board"
-            accent = "green and red warning accents"
-        elif any(kw in combined for kw in ['python', 'javascript', 'rust', 'go', 'プログラミング', 'コード', 'typescript']):
-            scene = "a photorealistic code editor (dark theme) with syntax-highlighted code, multiple open tabs, and a glowing cursor mid-line"
-            accent = "warm orange and blue syntax highlighting glow"
-        elif any(kw in combined for kw in ['cloud', 'aws', 'docker', 'kubernetes', 'devops', 'クラウド', 'インフラ']):
-            scene = "a photorealistic 3D server rack room with glowing blue LED lights, holographic cloud architecture diagrams floating above"
-            accent = "cool blue and white LED glow"
-        elif any(kw in combined for kw in ['web', 'react', 'next', 'フロントエンド', 'api', 'ブラウザ']):
-            scene = "a photorealistic browser window showing a sleek modern web application UI with layered component panels floating in 3D space"
-            accent = "vibrant blue and white interface glow"
-        elif any(kw in combined for kw in ['半導体', 'chip', 'gpu', 'cpu', 'ハードウェア', 'quantum', '量子']):
-            scene = "a photorealistic extreme close-up of a glowing microchip on a circuit board, with visible trace lines radiating outward"
-            accent = "golden traces and blue silicon glow"
-        elif any(kw in combined for kw in ['スタートアップ', '資金調達', 'ビジネス', '買収', 'ipo']):
-            scene = "a photorealistic upward-trending holographic stock chart floating above a modern glass office desk with a laptop"
-            accent = "green growth indicators and blue data lines"
-        else:
-            scene = "a photorealistic futuristic tech workspace with multiple holographic screens showing data dashboards and code"
-            accent = "blue and purple holographic glow"
+        prompt = f"""Generate a premium tech blog thumbnail image for this article:
+Title: "{title}"
+Tags: {tag_str}
 
-        prompt = f"""Generate a premium tech blog thumbnail image.
+IMPORTANT: The visual must directly represent the article's specific topic.
+For example:
+- An article about cloud market share → server racks, cloud icons, competing brand colors
+- An article about a security breach → dark terminal, warning lights, broken shield
+- An article about a new AI model → AI chat interface, neural network visualization
+- An article about programming language trends → code editor with the specific language
 
-SCENE: {scene}
+Choose the most fitting photorealistic scene that a reader would immediately associate with this article's topic.
 
 COMPOSITION:
 - Dark background (deep navy/charcoal #0a1628) for the entire image
 - Main visual element positioned in the center-left area
 - Right third of image is darker/emptier (note.com overlays article title here)
 - Cinematic depth of field: sharp focal point with soft bokeh background
-- {accent}
 
 BRAND STYLE (consistent across all thumbnails):
 - Color palette: always dark navy base (#0a1628) with colored accents
