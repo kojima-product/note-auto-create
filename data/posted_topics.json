@@ -2730,6 +2730,27 @@
       "char_count": 5390,
       "note_url": "https://note.com/kojima_product/n/n6a338337b8dc",
       "article_type": "trend_overview"
+    },
+    {
+      "url": "https://finance.yahoo.com/news/global-times-openclaw-craze-inspires-150000325.html",
+      "title": "OpenClawに関する記事を作成して",
+      "posted_at": "2026-03-16T01:20:23.042261",
+      "category": "tech",
+      "tags": [
+        "OpenClaw",
+        "AI",
+        "AIエージェント",
+        "自律型AI",
+        "OpenAI",
+        "テクノロジー",
+        "PC",
+        "生成AI"
+      ],
+      "is_free": false,
+      "price": 200,
+      "char_count": 5425,
+      "note_url": "https://note.com/kojima_product/n/n2343d58fbaed",
+      "article_type": "speed_analysis"
     }
   ]
 }
