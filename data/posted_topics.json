@@ -2751,6 +2751,48 @@
       "char_count": 5425,
       "note_url": "https://note.com/kojima_product/n/n2343d58fbaed",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.softbank.jp/sbnews/archive/category/AI",
+      "title": "AI（人工知能）の記事一覧 - ITをもっと身近に。ソフトバンクニュース",
+      "posted_at": "2026-03-16T11:16:57.206885",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "ソフトバンク",
+        "BeyondAI",
+        "データセンター",
+        "SoftVoice",
+        "カスハラ対策",
+        "東京大学",
+        "人工知能"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 4972,
+      "note_url": "https://note.com/kojima_product/n/n27fe861f6bb8",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://hanzochang.com/articles/42",
+      "title": "OpenClawの実態とは何か",
+      "posted_at": "2026-03-16T11:24:04.760288",
+      "category": "tech",
+      "tags": [
+        "OpenClaw",
+        "AIエージェント",
+        "セキュリティ",
+        "OSS",
+        "CVE",
+        "VPS",
+        "AI",
+        "プログラミング"
+      ],
+      "is_free": false,
+      "price": 200,
+      "char_count": 5176,
+      "note_url": "https://note.com/kojima_product/n/nbc10bf23537f",
+      "article_type": "speed_analysis"
     }
   ]
 }

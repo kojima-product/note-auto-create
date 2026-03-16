@@ -178,47 +178,44 @@ class ThumbnailGenerator:
         return self.generate(prompt)
 
     def _create_japanese_prompt(self, title: str, tags: List[str] = None) -> str:
-        """タイトル内容に沿ったブランド統一サムネイルを生成
+        """タイトル内容に沿ったAI×アニメ融合スタイルのサムネイルを生成
 
         戦略:
-        - タイトルをそのままGeminiに渡し、内容に最適なシーンを生成させる
-        - ブランドテンプレート（ダーク背景・シネマティック照明）で統一感を維持
+        - タイトルをGeminiに渡し、内容に最適なシーンを生成させる
+        - AIアート×アニメの融合スタイルで統一感 + 目を引くビジュアル
+        - シームレスで未来的、かつ漫画的なエネルギー感
         """
         tag_str = ', '.join(tags[:5]) if tags else ''
 
-        prompt = f"""Generate a premium tech blog thumbnail image for this article:
+        prompt = f"""Generate a stunning tech blog thumbnail image for this article:
 Title: "{title}"
 Tags: {tag_str}
 
 IMPORTANT: The visual must directly represent the article's specific topic.
-For example:
-- An article about cloud market share → server racks, cloud icons, competing brand colors
-- An article about a security breach → dark terminal, warning lights, broken shield
-- An article about a new AI model → AI chat interface, neural network visualization
-- An article about programming language trends → code editor with the specific language
+Choose the scene that a reader would immediately associate with this article's content.
 
-Choose the most fitting photorealistic scene that a reader would immediately associate with this article's topic.
+ART STYLE — "AI × Anime Fusion":
+- Seamless blend of anime/manga aesthetics with futuristic AI-generated art
+- Vibrant neon color palette: electric blue, hot pink, cyan, purple gradients
+- Glowing particle effects, light trails, and energy flows throughout
+- Anime-inspired dynamic composition with dramatic perspective and motion lines
+- Holographic UI elements and floating data visualizations woven into the scene
+- Cel-shaded lighting mixed with volumetric god rays
+- The overall feel should be like a key visual from a sci-fi anime (Ghost in the Shell, Psycho-Pass, Cyberpunk Edgerunners)
 
 COMPOSITION:
-- Dark background (deep navy/charcoal #0a1628) for the entire image
-- Main visual element positioned in the center-left area
-- Right third of image is darker/emptier (note.com overlays article title here)
-- Cinematic depth of field: sharp focal point with soft bokeh background
-
-BRAND STYLE (consistent across all thumbnails):
-- Color palette: always dark navy base (#0a1628) with colored accents
-- Photorealistic 3D render style, NOT flat illustration
-- Cinematic lighting with strong rim light from behind
-- Subtle lens flare or light leak for premium feel
-- Slight vignette darkening at edges
+- Wide cinematic landscape format (1.91:1)
+- Main visual element in center-left with dramatic depth
+- Background has atmospheric depth with bokeh-like glowing particles
+- Seamless flow — no hard panel borders, everything blends together
 
 STRICT RULES:
-- ABSOLUTELY NO text, letters, numbers, words, or watermarks
-- NO cartoon, manga, anime, or illustrated style
-- NO human faces or hands
-- Photorealistic or 3D render quality only
+- NO text, letters, numbers, words, or watermarks anywhere
+- NO speech bubbles or comic panels
+- NO realistic human faces (stylized silhouettes or abstract figures are OK)
+- Emphasis on atmosphere, technology, and energy — not characters
 
-Dimensions: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT} pixels, landscape 1.91:1."""
+Dimensions: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT} pixels, landscape."""
 
         return prompt
 
