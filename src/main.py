@@ -16,9 +16,42 @@ from src.topic_collector import TopicCollector, Topic
 from src.article_generator import ArticleGenerator
 from src.note_publisher import NotePublisher
 from src.posted_tracker import PostedTracker
-from src.email_notifier import EmailNotifier
+from src.discord_notifier import DiscordNotifier
 from src.thumbnail_generator import ThumbnailGenerator
 from src.web_searcher import WebSearcher
+from src.pricing_strategy import PricingStrategy
+
+
+def validate_article_quality(article, is_free: bool) -> tuple[bool, list[str]]:
+    """Pre-publish quality gate. Returns (passed, list of issues)."""
+    issues = []
+    content = article.content
+    char_count = len(content)
+
+    # Character count check
+    min_chars = 1500 if is_free else 2500
+    if char_count < min_chars:
+        issues.append(f"文字数不足: {char_count}文字（最低{min_chars}文字）")
+
+    # Paywall marker check (paid articles only)
+    if not is_free:
+        if "===ここから有料===" not in content:
+            issues.append("有料マーカー「===ここから有料===」が見つかりません")
+        else:
+            # Marker position check: free preview should be 20-40% of total
+            marker_pos = content.index("===ここから有料===")
+            ratio = marker_pos / char_count if char_count > 0 else 0
+            if ratio < 0.10:
+                issues.append(f"無料プレビューが短すぎます（全体の{ratio:.0%}）")
+            elif ratio > 0.50:
+                issues.append(f"無料プレビューが長すぎます（全体の{ratio:.0%}）")
+
+    # Tag count check
+    if len(article.tags) < 3:
+        issues.append(f"タグ不足: {len(article.tags)}個（最低3個）")
+
+    passed = len(issues) == 0
+    return passed, issues
 
 
 def cleanup_generated_files():
@@ -117,14 +150,15 @@ def create_single_article(
     generator: ArticleGenerator,
     publisher: NotePublisher,
     tracker: PostedTracker,
-    notifier: EmailNotifier,
+    notifier: DiscordNotifier,
     price: int,
     dry_run: bool,
     article_num: int = 1,
     total: int = 1,
     is_free: bool = False,
     thumbnail_generator: ThumbnailGenerator = None,
-    custom_topic: str = None
+    custom_topic: str = None,
+    pricing_strategy: PricingStrategy = None,
 ) -> dict:
     """1つの記事を作成して投稿。結果をdictで返す"""
     prefix = f"[{article_num}/{total}] " if total > 1 else ""
@@ -152,9 +186,29 @@ def create_single_article(
     print(f"  ソース: {topic.source}")
     print(f"  リンク: {topic.link}")
 
+    # Determine article type based on topic characteristics
+    detected_article_type = generator.detect_article_type(topic) if hasattr(generator, 'detect_article_type') else "speed_analysis"
+
+    # Dynamic pricing if strategy is available and not already free
+    if pricing_strategy and not is_free:
+        recommendation = pricing_strategy.get_price_recommendation(
+            category=topic.category,
+            char_count=3000,  # Estimated, will be updated after generation
+            article_type=detected_article_type,
+        )
+        if recommendation["is_free"]:
+            is_free = True
+            price = 0
+            article_type = "無料記事（動的判定）"
+            result["is_free"] = True
+        elif recommendation["price"] != price:
+            price = recommendation["price"]
+            article_type = f"有料記事（{price}円・動的価格）"
+        print(f"  価格戦略: {', '.join(recommendation['reasoning'])}")
+
     # Step 2: 記事生成
     print(f"\n{prefix}[Step 2/3] 記事を生成中...（{article_type}）")
-    article = generator.generate(topic, is_free=is_free)
+    article = generator.generate(topic, is_free=is_free, article_type=detected_article_type)
 
     print(f"\n{prefix}生成された記事:")
     print(f"  タイトル: {article.title}")
@@ -163,6 +217,34 @@ def create_single_article(
     print(f"  記事タイプ: {article_type}")
     if article.thumbnail_prompt:
         print(f"  サムネイル: {article.thumbnail_prompt[:50]}...")
+
+    # Recalculate price with actual character count
+    if pricing_strategy and not is_free:
+        final_recommendation = pricing_strategy.get_price_recommendation(
+            category=topic.category,
+            char_count=len(article.content),
+            article_type=detected_article_type,
+        )
+        if not final_recommendation["is_free"] and final_recommendation["price"] != price:
+            price = final_recommendation["price"]
+            article_type = f"有料記事（{price}円・動的価格）"
+            print(f"  価格再計算（実文字数）: {price}円")
+
+    # Quality gate: validate article before proceeding
+    passed, issues = validate_article_quality(article, is_free)
+    if not passed:
+        print(f"\n{prefix}品質ゲート: 不合格")
+        for issue in issues:
+            print(f"  - {issue}")
+        result["error"] = f"品質チェック不合格: {'; '.join(issues)}"
+        if notifier:
+            notifier.send_notification(
+                article_title=article.title,
+                success=False,
+                details=f"品質チェック不合格:\n" + "\n".join(f"- {i}" for i in issues)
+            )
+        return result
+    print(f"  品質ゲート: 合格")
 
     # サムネイル画像を生成
     thumbnail_path = None
@@ -207,9 +289,16 @@ def create_single_article(
     if dry_run:
         print(f"\n{prefix}[Dry-run] noteへの投稿をスキップしました")
         # 投稿済みとして記録（dry-runでも重複防止のため）
-        tracker.mark_as_posted(topic.link, topic.title)
+        tracker.mark_as_posted(
+            topic.link, topic.title,
+            category=topic.category,
+            tags=article.tags,
+            is_free=is_free,
+            price=price,
+            char_count=len(article.content),
+            article_type=detected_article_type,
+        )
         result["success"] = True
-        # メール通知
         if notifier:
             notifier.send_notification(
                 article_title=article.title,
@@ -219,18 +308,28 @@ def create_single_article(
         return result
 
     # Step 3: noteに投稿
-    print(f"\n{prefix}[Step 3/3] noteに投稿中...")
-    success = publisher.publish(article, thumbnail_path=thumbnail_path)
+    print(f"\n{prefix}[Step 3/3] noteに投稿中...（価格: {price}円）")
+    note_url = publisher.publish(article, thumbnail_path=thumbnail_path, price=price)
 
-    if success:
+    if note_url:
         # 投稿済みとして記録
-        tracker.mark_as_posted(topic.link, topic.title)
+        tracker.mark_as_posted(
+            topic.link, topic.title,
+            category=topic.category,
+            tags=article.tags,
+            is_free=is_free,
+            price=price,
+            char_count=len(article.content),
+            note_url=note_url,
+            article_type=detected_article_type,
+        )
         print(f"\n{prefix}投稿成功！")
         result["success"] = True
-        # メール通知
+        result["note_url"] = note_url
         if notifier:
             notifier.send_notification(
                 article_title=article.title,
+                article_url=note_url,
                 success=True,
                 details=f"タグ: {', '.join(article.tags) if article.tags else 'なし'}\n文字数: {len(article.content)}文字"
             )
@@ -239,7 +338,6 @@ def create_single_article(
         print(f"\n{prefix}エラー: noteへの投稿に失敗しました")
         print(f"生成された記事は {output_file} に保存されています")
         result["error"] = "noteへの投稿に失敗しました"
-        # 失敗通知
         if notifier:
             notifier.send_notification(
                 article_title=article.title,
@@ -294,10 +392,10 @@ def post_existing_article(article_file: str, thumbnail_path: str = None, headles
 
     # 投稿
     publisher = NotePublisher(headless=headless, price=price)
-    success = publisher.publish(article, thumbnail_path=thumbnail_path)
+    note_url = publisher.publish(article, thumbnail_path=thumbnail_path)
 
-    if success:
-        print("\n投稿成功！")
+    if note_url:
+        print(f"\n投稿成功！ URL: {note_url}")
         return True
     else:
         print("\n投稿失敗")
@@ -465,7 +563,7 @@ def main():
     use_web_search = not args.no_web_search
     collector = TopicCollector(use_web_search=use_web_search)
     generator = ArticleGenerator(model=args.model)
-    notifier = EmailNotifier()
+    notifier = DiscordNotifier()
 
     # サムネイルジェネレーターを初期化（オプション）
     thumbnail_generator = None
@@ -476,6 +574,10 @@ def main():
         except ValueError as e:
             print(f"サムネイル生成: 無効（{e}）")
             thumbnail_generator = None
+
+    # 価格戦略を初期化
+    pricing_strategy = PricingStrategy()
+    print(f"価格戦略: 有効（データ信頼度: {pricing_strategy.analyzer.confidence:.0%}）")
 
     # パブリッシャーは有料用と無料用で分けて作成（dry-runでない場合）
     publisher_paid = NotePublisher(headless=args.headless, price=args.price) if not args.dry_run else None
@@ -508,7 +610,8 @@ def main():
             total=args.count,
             is_free=is_free,
             thumbnail_generator=thumbnail_generator,
-            custom_topic=custom_topic
+            custom_topic=custom_topic,
+            pricing_strategy=pricing_strategy,
         )
 
         article_results.append(result)

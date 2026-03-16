@@ -178,31 +178,48 @@ class ThumbnailGenerator:
         return self.generate(prompt)
 
     def _create_japanese_prompt(self, title: str, tags: List[str] = None) -> str:
-        """日本語タイトルからサムネイル用プロンプトを作成（4コマ漫画スタイル）"""
-        # タグがあれば追加
-        tag_str = ""
-        if tags:
-            tag_str = f" 関連キーワード: {', '.join(tags[:5])}"
+        """日本語タイトルからプロフェッショナルなテックブログサムネイルを生成"""
+        # Determine visual theme from tags/title
+        tag_lower = ' '.join(tags[:5]).lower() if tags else ''
+        title_lower = title.lower()
+        combined = title_lower + ' ' + tag_lower
 
-        prompt = f"""「{title}」という記事のサムネイル画像を生成してください。{tag_str}
+        # Select abstract icon based on topic
+        if any(kw in combined for kw in ['ai', '機械学習', 'llm', 'chatgpt', 'claude', 'gpt', '生成ai']):
+            icon_desc = "a stylized brain with glowing neural circuit traces"
+            gradient = "deep indigo to electric purple"
+        elif any(kw in combined for kw in ['セキュリティ', 'security', '脆弱性', '攻撃', 'hack']):
+            icon_desc = "a minimalist shield icon with a geometric lock symbol"
+            gradient = "dark navy to teal"
+        elif any(kw in combined for kw in ['python', 'javascript', 'rust', 'go', 'プログラミング', 'コード']):
+            icon_desc = "abstract code brackets < /> with flowing geometric lines"
+            gradient = "midnight blue to cyan"
+        elif any(kw in combined for kw in ['cloud', 'aws', 'docker', 'kubernetes', 'devops', 'クラウド']):
+            icon_desc = "abstract cloud shapes connected by glowing network nodes"
+            gradient = "dark teal to sky blue"
+        elif any(kw in combined for kw in ['web', 'react', 'next', 'フロントエンド', 'api']):
+            icon_desc = "interconnected geometric shapes representing web architecture"
+            gradient = "deep blue to vibrant cyan"
+        else:
+            icon_desc = "abstract geometric tech pattern with connected nodes and lines"
+            gradient = "deep blue-purple to electric blue"
 
-【重要】4コマ漫画スタイルで作成：
-- 画像を4つのパネルに分割（2x2のグリッド）
-- 各パネルの左上隅に大きく見やすい番号（①②③④ または 1,2,3,4）を配置して読む順番を明示
-- 各パネルでストーリーを表現：
-  ①左上: 問題や課題を抱えている場面（困っている、悩んでいる）
-  ②右上: 解決策を発見してひらめく瞬間（驚き、希望）
-  ③左下: 解決策を実践している場面（行動、努力）
-  ④右下: 成功・達成して喜んでいる場面（笑顔、成果）
+        prompt = f"""Create a professional tech blog header image for an article titled: "{title}".
 
-デザイン要件：
-- アニメ/イラスト風のスタイル（日本の漫画風）
-- 明るくポジティブな雰囲気
-- キャラクターの表情をしっかり描く
-- パネル番号は丸囲み数字で目立つように配置
-- 吹き出しに短い日本語テキストを入れる
-- 記事のテーマに合わせた具体的なシーン
-- サイズ: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT}ピクセル"""
+Visual design:
+- Background: smooth {gradient} gradient, subtle mesh or noise texture for depth
+- Center element: {icon_desc}, rendered in a clean minimalist style with soft glow effects
+- Accent: thin geometric lines or subtle dot grid pattern in the background
+- Lighting: soft ambient glow emanating from the central icon
+
+STRICT RULES:
+- ABSOLUTELY NO text, letters, numbers, or words anywhere in the image
+- NO cartoon characters, NO manga/anime style, NO speech bubbles, NO comic panels
+- NO human faces or figures
+- Style: clean, minimal, premium — like a header image for a tech publication (Wired, TechCrunch, Verge)
+- Mood: futuristic, sophisticated, trustworthy
+
+Dimensions: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT} pixels, landscape 1.91:1 aspect ratio."""
 
         return prompt
 

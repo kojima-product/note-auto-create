@@ -15,7 +15,7 @@ on:
       count:
         description: '作成する記事の数'
         required: false
-        default: '5'
+        default: '3'
       model:
         description: '使用するモデル (opus/sonnet/haiku)'
         required: false
@@ -41,7 +41,7 @@ jobs:
   post-articles:
     runs-on: ubuntu-latest
     environment: note-auto-create-actions  # Environment secretsを使用
-    timeout-minutes: 360  # 6時間（5記事×1時間間隔 + バッファ）
+    timeout-minutes: 360  # 6時間
 
     steps:
       - name: Checkout repository
@@ -63,40 +63,53 @@ jobs:
           playwright install chromium
           playwright install-deps chromium
 
-      - name: Restore posted topics data
+      - name: Restore data
         uses: actions/cache@v4
         with:
-          path: data/posted_topics.json
-          key: posted-topics-${{ github.run_id }}
+          path: |
+            data/posted_topics.json
+            data/article_stats.json
+          key: note-data-${{ github.run_id }}
           restore-keys: |
-            posted-topics-
+            note-data-
+
+      - name: Collect stats from note.com
+        env:
+          NOTE_EMAIL: ${{ secrets.NOTE_EMAIL }}
+          NOTE_PASSWORD: ${{ secrets.NOTE_PASSWORD }}
+        run: |
+          python -m src.stats_scraper --headless || echo "Stats collection failed (non-fatal)"
+        continue-on-error: true
 
       - name: Run article creation
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NOTE_EMAIL: ${{ secrets.NOTE_EMAIL }}
           NOTE_PASSWORD: ${{ secrets.NOTE_PASSWORD }}
+          NOTE_USERNAME: kojima_product
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           USE_MODEL: ${{ github.event.inputs.model || 'sonnet' }}
           CUSTOM_TOPIC: ${{ github.event.inputs.custom_topic }}
+          INPUT_COUNT: ${{ github.event.inputs.count || '3' }}
+          INPUT_FREE_RATIO: ${{ github.event.inputs.free_ratio || '0.2' }}
+          INPUT_NO_THUMBNAIL: ${{ github.event.inputs.no_thumbnail }}
+          INPUT_THUMBNAIL_MODEL: ${{ github.event.inputs.thumbnail_model || 'pro' }}
         run: |
           THUMBNAIL_FLAGS=""
-          if [ "${{ github.event.inputs.no_thumbnail }}" = "true" ]; then
+          if [ "$INPUT_NO_THUMBNAIL" = "true" ]; then
             THUMBNAIL_FLAGS="--no-thumbnail"
           else
-            THUMBNAIL_FLAGS="--thumbnail-model ${{ github.event.inputs.thumbnail_model || 'pro' }}"
+            THUMBNAIL_FLAGS="--thumbnail-model $INPUT_THUMBNAIL_MODEL"
           fi
 
           python -m src.main \
             --headless \
-            --count ${{ github.event.inputs.count || '5' }} \
+            --count "$INPUT_COUNT" \
             --interval 3600 \
-            --model ${{ github.event.inputs.model || 'sonnet' }} \
-            --free-ratio ${{ github.event.inputs.free_ratio || '0.2' }} \
+            --model "$USE_MODEL" \
+            --free-ratio "$INPUT_FREE_RATIO" \
             $THUMBNAIL_FLAGS
 
       - name: Upload generated articles
@@ -117,12 +130,14 @@ jobs:
             error_*.png
           retention-days: 7
 
-      - name: Save posted topics data
+      - name: Save data
         uses: actions/cache/save@v4
         if: always()
         with:
-          path: data/posted_topics.json
-          key: posted-topics-${{ github.run_id }}
+          path: |
+            data/posted_topics.json
+            data/article_stats.json
+          key: note-data-${{ github.run_id }}
 
       - name: Cleanup generated files
         if: always()
@@ -130,11 +145,56 @@ jobs:
           rm -rf output/*.md output/thumbnails/* debug_*.png error_*.png *.png *.jpg 2>/dev/null || true
           echo "Generated files cleaned up"
 
-      - name: Commit posted topics data
+      - name: Commit data files
         if: success()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add data/posted_topics.json
+          git add data/posted_topics.json data/article_stats.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Update posted topics [skip ci]"
           git push
+
+  # Weekly performance report (Sundays at 23:00 UTC = Mondays 8:00 JST)
+  weekly-report:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 23 * * 0' || github.event_name == 'workflow_dispatch'
+    environment: note-auto-create-actions
+    needs: post-articles
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Restore data
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/posted_topics.json
+            data/article_stats.json
+          key: note-data-${{ github.run_id }}
+          restore-keys: |
+            note-data-
+
+      - name: Send weekly report
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python -c "
+          from src.discord_notifier import DiscordNotifier
+          notifier = DiscordNotifier()
+          if notifier.enabled:
+              notifier.send_weekly_report()
+          else:
+              print('Discord通知が無効です')
+          "

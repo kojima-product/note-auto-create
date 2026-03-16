@@ -1,10 +1,13 @@
 """note投稿モジュール - Playwrightを使用してnoteに投稿"""
 
 import os
+import re
 import time
+from typing import Optional
 from playwright.sync_api import sync_playwright, Page
 from dotenv import load_dotenv
 from .article_generator import Article
+from .note_auth import create_browser_context, setup_page, login as note_login
 
 load_dotenv()
 
@@ -27,69 +30,55 @@ class NotePublisher:
         self.headless = headless
         self.email = os.getenv("NOTE_EMAIL")
         self.password = os.getenv("NOTE_PASSWORD")
+        self.username = os.getenv("NOTE_USERNAME", "")
         self.price = price if price is not None else self.DEFAULT_PRICE
         self.thumbnail_path = thumbnail_path
 
         if not self.email or not self.password:
             raise ValueError("NOTE_EMAIL と NOTE_PASSWORD を .env に設定してください")
 
-    def publish(self, article: Article, thumbnail_path: str = None) -> bool:
+    def publish(self, article: Article, thumbnail_path: str = None, price: int = None) -> Optional[str]:
         """
         記事を投稿する
 
         Args:
             article: 投稿する記事
             thumbnail_path: サムネイル画像のパス（指定するとインスタンスの設定を上書き）
+            price: 有料記事の価格（指定するとインスタンスの設定を上書き）
 
         Returns:
-            成功した場合True
+            投稿後の記事URL（成功時）、Noneは失敗
         """
+        # 価格を決定（引数優先）
+        if price is not None:
+            self.price = price
         # サムネイルパスを決定（引数優先）
         effective_thumbnail = thumbnail_path or self.thumbnail_path
         with sync_playwright() as p:
-            # headlessモードでもボット検出を回避するための設定
-            browser = p.chromium.launch(
-                headless=self.headless,
-                args=[
-                    "--disable-blink-features=AutomationControlled",
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                ]
-            )
-            context = browser.new_context(
-                viewport={"width": 1280, "height": 900},
-                locale="ja-JP",
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            )
-            page = context.new_page()
-
-            # webdriverプロパティを削除してボット検出を回避
-            page.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', {
-                    get: () => undefined
-                });
-            """)
+            browser, context = create_browser_context(p, headless=self.headless)
+            page = setup_page(context)
 
             try:
                 # ログイン
                 if not self._login(page):
                     print("ログインに失敗しました")
-                    return False
+                    return None
 
                 print("ログイン成功")
 
                 # 記事作成・投稿
-                if not self._create_and_publish(page, article, effective_thumbnail):
+                article_url = self._create_and_publish(page, article, effective_thumbnail)
+                if not article_url:
                     print("投稿に失敗しました")
-                    return False
+                    return None
 
-                print("投稿成功！")
-                return True
+                print(f"投稿成功！ URL: {article_url}")
+                return article_url
 
             except Exception as e:
                 print(f"エラーが発生しました: {e}")
                 page.screenshot(path="error_screenshot.png")
-                return False
+                return None
 
             finally:
                 browser.close()
@@ -99,61 +88,8 @@ class NotePublisher:
         return self.publish(article)
 
     def _login(self, page: Page) -> bool:
-        """noteにログイン"""
-        print("ログイン中...")
-
-        page.goto(self.LOGIN_URL)
-        page.wait_for_load_state("networkidle")
-        time.sleep(3)
-
-        # デバッグ用スクリーンショット
-        page.screenshot(path="debug_login_page.png")
-        print("  デバッグ: ログインページのスクリーンショットを保存")
-
-        # メールアドレス入力
-        try:
-            email_input = page.locator('input#email')
-            email_input.wait_for(state="visible", timeout=10000)
-            email_input.fill(self.email)
-            print("  メールアドレス入力完了")
-        except Exception as e:
-            print(f"  メールアドレス入力エラー: {e}")
-            page.screenshot(path="debug_email_error.png")
-            return False
-
-        # パスワード入力
-        try:
-            password_input = page.locator('input#password')
-            password_input.wait_for(state="visible", timeout=10000)
-            password_input.fill(self.password)
-            print("  パスワード入力完了")
-        except Exception as e:
-            print(f"  パスワード入力エラー: {e}")
-            page.screenshot(path="debug_password_error.png")
-            return False
-
-        # ログインボタンクリック
-        try:
-            login_button = page.locator('button:has-text("ログイン")')
-            login_button.wait_for(state="visible", timeout=10000)
-            login_button.click()
-            print("  ログインボタンクリック完了")
-        except Exception as e:
-            print(f"  ログインボタンエラー: {e}")
-            page.screenshot(path="debug_login_button_error.png")
-            return False
-
-        try:
-            # ログイン後のページ遷移を待つ
-            page.wait_for_url("**/", timeout=30000)
-            time.sleep(3)
-            page.screenshot(path="debug_after_login.png")
-            print("  ログイン後のスクリーンショットを保存")
-            return True
-        except Exception as e:
-            print(f"  ログイン後の画面遷移エラー: {e}")
-            page.screenshot(path="debug_login_failed.png")
-            return False
+        """noteにログイン（共通認証モジュールに委譲）"""
+        return note_login(page, self.email, self.password)
 
     def _clean_content_for_note(self, content: str) -> str:
         """note.com向けにコンテンツを整形"""
@@ -234,14 +170,181 @@ class NotePublisher:
         return content
 
     def _type_content(self, page: Page, content: str, delay: int = 2) -> None:
-        """コンテンツをタイピングアニメーションで入力（マークダウン対応）"""
+        """コンテンツをHTML変換してペーストで入力（マークダウンが正確にレンダリングされる）"""
         # note.com向けに整形
         content = self._clean_content_for_note(content)
-        # ストリーミング形式でタイピング（マークダウンが正しくレンダリングされる）
-        page.keyboard.type(content, delay=delay)
+        # Markdown → HTML変換
+        html = self._markdown_to_html(content)
+        # ProseMirrorにHTMLペースト
+        self._paste_html(page, html)
         time.sleep(1)
 
-    def _create_and_publish(self, page: Page, article: Article, thumbnail_path: str = None) -> bool:
+    def _markdown_to_html(self, text: str) -> str:
+        """マークダウンをHTMLに変換（note.comで使用するサブセットのみ対応）"""
+        lines = text.split('\n')
+        html_parts = []
+        in_code_block = False
+        code_lines = []
+        in_list = False  # bullet list
+        in_ol = False  # ordered list
+        in_blockquote = False
+
+        def close_list():
+            nonlocal in_list, in_ol
+            if in_list:
+                html_parts.append('</ul>')
+                in_list = False
+            if in_ol:
+                html_parts.append('</ol>')
+                in_ol = False
+
+        def close_blockquote():
+            nonlocal in_blockquote
+            if in_blockquote:
+                html_parts.append('</blockquote>')
+                in_blockquote = False
+
+        def inline_format(s: str) -> str:
+            """Inline formatting: **bold** and `code`"""
+            # Inline code first (to avoid bold inside code)
+            s = re.sub(r'`([^`]+)`', r'<code>\1</code>', s)
+            # Bold
+            s = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', s)
+            return s
+
+        for line in lines:
+            stripped = line.strip()
+
+            # Code block toggle
+            if stripped.startswith('```'):
+                if not in_code_block:
+                    close_list()
+                    close_blockquote()
+                    in_code_block = True
+                    code_lines = []
+                else:
+                    html_parts.append('<pre><code>' + '\n'.join(code_lines) + '</code></pre>')
+                    in_code_block = False
+                continue
+
+            if in_code_block:
+                # HTML-escape inside code blocks
+                escaped = line.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                code_lines.append(escaped)
+                continue
+
+            # Empty line
+            if not stripped:
+                close_list()
+                close_blockquote()
+                continue
+
+            # Heading
+            heading_match = re.match(r'^(#{2,3})\s+(.*)', line)
+            if heading_match:
+                close_list()
+                close_blockquote()
+                level = len(heading_match.group(1))
+                text = inline_format(heading_match.group(2))
+                html_parts.append(f'<h{level}>{text}</h{level}>')
+                continue
+
+            # Bullet list
+            bullet_match = re.match(r'^-\s+(.*)', line)
+            if bullet_match:
+                close_blockquote()
+                if in_ol:
+                    html_parts.append('</ol>')
+                    in_ol = False
+                if not in_list:
+                    html_parts.append('<ul>')
+                    in_list = True
+                text = inline_format(bullet_match.group(1))
+                html_parts.append(f'<li>{text}</li>')
+                continue
+
+            # Ordered list
+            num_match = re.match(r'^\d+\.\s+(.*)', line)
+            if num_match:
+                close_blockquote()
+                if in_list:
+                    html_parts.append('</ul>')
+                    in_list = False
+                if not in_ol:
+                    html_parts.append('<ol>')
+                    in_ol = True
+                text = inline_format(num_match.group(1))
+                html_parts.append(f'<li>{text}</li>')
+                continue
+
+            # Blockquote
+            quote_match = re.match(r'^>\s*(.*)', line)
+            if quote_match:
+                close_list()
+                if not in_blockquote:
+                    html_parts.append('<blockquote>')
+                    in_blockquote = True
+                text = inline_format(quote_match.group(1))
+                html_parts.append(f'<p>{text}</p>')
+                continue
+
+            # Normal paragraph
+            close_list()
+            close_blockquote()
+            text = inline_format(stripped)
+            html_parts.append(f'<p>{text}</p>')
+
+        # Close any open tags
+        if in_code_block:
+            html_parts.append('<pre><code>' + '\n'.join(code_lines) + '</code></pre>')
+        close_list()
+        close_blockquote()
+
+        return '\n'.join(html_parts)
+
+    def _paste_html(self, page: Page, html: str) -> None:
+        """HTMLをProseMirrorエディタにClipboardEvent経由でペースト"""
+        page.evaluate("""(html) => {
+            const editor = document.querySelector('.ProseMirror');
+            if (!editor) return;
+            const dt = new DataTransfer();
+            dt.setData('text/html', html);
+            const event = new ClipboardEvent('paste', {
+                clipboardData: dt,
+                bubbles: true,
+                cancelable: true
+            });
+            editor.dispatchEvent(event);
+        }""", html)
+
+    def _get_published_url(self, page: Page) -> Optional[str]:
+        """Get the public article URL after publishing.
+
+        Uses NOTE_USERNAME env var + note_id from the editor URL.
+        Falls back to waiting for redirect if username is not configured.
+        """
+        import re
+
+        # Strategy 1: Wait for redirect to public article page
+        for _ in range(3):
+            time.sleep(2)
+            url = page.url
+            # Public article URL: https://note.com/{username}/n/{note_id}
+            if "note.com" in url and "/n/" in url and "editor." not in url:
+                return url
+
+        # Strategy 2: Construct URL from editor URL + configured username
+        url = page.url
+        match = re.search(r"editor\.note\.com/notes/(n[a-f0-9]+)", url)
+        if match:
+            note_id = match.group(1)
+            if self.username:
+                return f"https://note.com/{self.username}/n/{note_id}"
+
+        # Last resort
+        return url if "note.com" in url else None
+
+    def _create_and_publish(self, page: Page, article: Article, thumbnail_path: str = None) -> Optional[str]:
         """記事を作成して投稿"""
         print("記事作成ページへ移動中...")
 
@@ -307,8 +410,17 @@ class NotePublisher:
         title_input.fill(article.title)
         time.sleep(1)
 
-        # 本文入力（マーカー含む全体をタイピング）
+        # 本文を準備
         content = article.content
+
+        # Calculate paid line position ratio before removing marker
+        self._paid_line_ratio = 0.0
+        if self.PAID_LINE_MARKER in content:
+            marker_pos = content.index(self.PAID_LINE_MARKER)
+            self._paid_line_ratio = marker_pos / len(content) if len(content) > 0 else 0.25
+            print(f"  有料ライン位置: 全体の{self._paid_line_ratio:.0%}")
+            # Remove marker from content so it doesn't appear to readers
+            content = content.replace(self.PAID_LINE_MARKER, "").replace("\n\n\n", "\n\n")
 
         # Whisk用サムネイルプロンプトを記事末尾に追加
         if article.thumbnail_prompt:
@@ -382,38 +494,31 @@ class NotePublisher:
                 if final_publish.is_visible():
                     final_publish.click()
                     time.sleep(5)
-                    return True
+                    return self._get_published_url(page)
 
         # 無料の場合は直接「投稿する」ボタン
         publish_button = page.locator('button:has-text("投稿する")')
         if publish_button.is_visible():
             publish_button.click()
             time.sleep(5)
-            return True
+            return self._get_published_url(page)
 
-        return False
+        return None
 
     def _select_paid_line_position(self, page: Page) -> None:
-        """有料ライン選択画面で、マーカーの位置に有料ラインを設定"""
+        """有料ライン選択画面で、事前計算した比率に基づいて有料ラインを設定"""
         try:
-            time.sleep(2)  # 画面が完全に読み込まれるのを待つ
-
-            # スクロール可能な領域を探してスクロールする
-            # マーカーを探すために上から下にスクロール
+            time.sleep(2)
             page.evaluate("window.scrollTo(0, 0)")
             time.sleep(0.5)
 
-            # デバッグ用スクリーンショット
             page.screenshot(path="debug_paid_line_selection.png")
-            print("  デバッグ: 有料ライン選択画面のスクリーンショットを保存")
 
-            # 「ラインをこの場所に変更」または類似のボタンを探す
-            # noteの有料ライン選択画面のボタンテキストを複数パターンで検索
+            # Find line position buttons
             button_patterns = [
                 'button:has-text("ラインをこの場所に変更")',
                 'button:has-text("この場所に変更")',
                 'button:has-text("ここに設定")',
-                '[class*="line"] button',
             ]
 
             line_buttons = []
@@ -421,82 +526,72 @@ class NotePublisher:
                 buttons = page.locator(pattern).all()
                 if buttons:
                     line_buttons = buttons
-                    print(f"  ボタン発見: {pattern} ({len(buttons)}個)")
+                    print(f"  有料ライン選択ボタン: {len(buttons)}個発見")
                     break
 
             if not line_buttons:
                 print("  有料ライン選択ボタンが見つかりません")
-                # ページのHTMLを取得してデバッグ
                 return
 
-            print(f"  有料ライン選択ボタン: {len(line_buttons)}個発見")
+            # Use pre-calculated ratio to select the button position
+            ratio = getattr(self, '_paid_line_ratio', 0.25)
+            target_index = max(0, int(len(line_buttons) * ratio) - 1)
+            target_index = min(target_index, len(line_buttons) - 1)
 
-            # マーカーテキストを探す（複数パターン）
-            marker_patterns = [
-                self.PAID_LINE_MARKER,  # ===ここから有料===
-                "ここから有料",
-                "有料エリア",
-            ]
+            print(f"  有料ライン位置: ボタン{target_index}/{len(line_buttons)} (比率{ratio:.0%})")
 
-            marker_element = None
-            # スクロールしながらマーカーを探す
-            for _ in range(5):
-                for pattern in marker_patterns:
-                    try:
-                        elem = page.locator(f'text="{pattern}"').first
-                        if elem.is_visible(timeout=500):
-                            # マーカーを画面中央にスクロール
-                            elem.scroll_into_view_if_needed()
-                            time.sleep(0.3)
-                            marker_element = elem
-                            print(f"  マーカー発見: {pattern}")
-                            break
-                    except:
-                        continue
-                if marker_element:
-                    break
-                # 下にスクロールして再検索
-                page.evaluate("window.scrollBy(0, 300)")
+            # Scroll to and click the target button
+            target_btn = line_buttons[target_index]
+            try:
+                target_btn.scroll_into_view_if_needed()
                 time.sleep(0.3)
-
-            if marker_element:
-                # マーカーが見つかった場合、その直前のボタンをクリック
-                marker_box = marker_element.bounding_box()
-                if marker_box:
-                    marker_y = marker_box['y']
-                    print(f"  マーカー位置: Y={marker_y}")
-
-                    # マーカーより上にある最も近いボタンを探す
-                    closest_button = None
-                    closest_distance = float('inf')
-
-                    for i, btn in enumerate(line_buttons):
-                        btn_box = btn.bounding_box()
-                        if btn_box:
-                            btn_y = btn_box['y']
-                            print(f"    ボタン{i}: Y={btn_y}")
-                            # マーカーより上にあるボタン
-                            if btn_y < marker_y:
-                                distance = marker_y - btn_y
-                                if distance < closest_distance:
-                                    closest_distance = distance
-                                    closest_button = btn
-
-                    if closest_button:
-                        print(f"  マーカー直前のボタンをクリック (距離: {closest_distance})")
-                        closest_button.click()
-                        time.sleep(1)
-                        return
-
-            # マーカーが見つからない場合、最初のボタンをクリック
-            if len(line_buttons) >= 1:
-                print("  マーカーが見つからないため、最初のボタンを使用")
-                line_buttons[0].click()
-                time.sleep(1)
+            except Exception:
+                pass
+            target_btn.click()
+            time.sleep(1)
 
         except Exception as e:
             print(f"  有料ライン位置設定でエラー: {e}")
             page.screenshot(path="error_paid_line_selection.png")
+
+    def _remove_paid_marker_from_content(self, page: Page) -> None:
+        """Remove ===ここから有料=== marker text from the article body via ProseMirror DOM"""
+        try:
+            removed = page.evaluate("""() => {
+                // Find all text nodes containing the marker
+                const walker = document.createTreeWalker(
+                    document.querySelector('.ProseMirror') || document.body,
+                    NodeFilter.SHOW_TEXT,
+                    null, false
+                );
+                let count = 0;
+                const nodesToClean = [];
+                while (walker.nextNode()) {
+                    if (walker.currentNode.textContent.includes('===ここから有料===')) {
+                        nodesToClean.push(walker.currentNode);
+                    }
+                }
+                for (const node of nodesToClean) {
+                    const newText = node.textContent.replace('===ここから有料===', '').trim();
+                    if (newText) {
+                        node.textContent = newText;
+                    } else {
+                        // Remove the entire paragraph if only the marker was in it
+                        const parent = node.parentElement;
+                        if (parent && parent.tagName === 'P') {
+                            parent.remove();
+                        } else {
+                            node.textContent = '';
+                        }
+                    }
+                    count++;
+                }
+                return count;
+            }""")
+            if removed:
+                print(f"  有料マーカーを記事本文から削除しました（{removed}箇所）")
+        except Exception as e:
+            print(f"  有料マーカー削除エラー（続行）: {e}")
 
     def _input_tags(self, page: Page, tags: list[str]) -> None:
         """ハッシュタグを入力"""

@@ -9,6 +9,39 @@ from .topic_collector import Topic
 
 load_dotenv()
 
+# Article type definitions
+ARTICLE_TYPES = {
+    "speed_analysis": {
+        "name": "速報解説型",
+        "description": "ニュース+深い考察",
+        "structure": "導入→背景→詳細解説→なぜ重要か→3年後の展望→実践Tips→まとめ",
+    },
+    "comparison": {
+        "name": "比較分析型",
+        "description": "X vs Y形式の比較",
+        "structure": "導入→比較対象の紹介→観点別比較→どちらを選ぶべきか→実践Tips→まとめ",
+    },
+    "practical_guide": {
+        "name": "実践ガイド型",
+        "description": "チュートリアル・ハンズオン寄り",
+        "structure": "導入→前提条件→ステップバイステップ→応用例→トラブルシューティング→まとめ",
+    },
+    "trend_overview": {
+        "name": "トレンド俯瞰型",
+        "description": "週のニュースまとめ・業界動向",
+        "structure": "導入→注目トピック3-5個→共通トレンド分析→今後の予測→まとめ",
+    },
+}
+
+# Keywords for article type detection
+TYPE_DETECTION_KEYWORDS = {
+    "comparison": ["vs", "比較", "対決", "違い", "どっち", "選び方", "versus"],
+    "practical_guide": ["入門", "使い方", "始め方", "チュートリアル", "ハンズオン", "実装",
+                        "how to", "getting started", "tutorial", "guide"],
+    "trend_overview": ["まとめ", "トレンド", "動向", "振り返り", "ランキング", "overview",
+                       "roundup", "週間", "monthly"],
+}
+
 
 class Article(BaseModel):
     """生成された記事"""
@@ -34,6 +67,44 @@ class ArticleGenerator:
         model_key = model or os.getenv("USE_MODEL", "haiku")
         self.model = self.MODELS.get(model_key, self.MODELS["haiku"])
         print(f"使用モデル: {self.model}")
+
+    def detect_article_type(self, topic: Topic) -> str:
+        """Detect the best article type based on topic characteristics.
+
+        Priority order: practical_guide > comparison > trend_overview > speed_analysis (default).
+        Comparison requires stronger signals (title-only match or multiple indicators).
+        """
+        title_lower = topic.title.lower()
+        summary_lower = topic.summary.lower() if topic.summary else ""
+        combined = title_lower + " " + summary_lower
+
+        # 1. Practical guide: highest priority - actionable content
+        guide_keywords = TYPE_DETECTION_KEYWORDS["practical_guide"]
+        for kw in guide_keywords:
+            if kw in combined:
+                return "practical_guide"
+
+        # 2. Comparison: require keyword in TITLE (not just summary) to avoid false positives
+        comparison_keywords = TYPE_DETECTION_KEYWORDS["comparison"]
+        strong_vs = ["vs", "versus", "対決", "どっち"]
+        weak_vs = ["比較", "違い", "選び方"]
+        # Strong signal: "vs" or similar in title
+        for kw in strong_vs:
+            if kw in title_lower:
+                return "comparison"
+        # Weak signal: "比較" etc. only counts if also in title
+        for kw in weak_vs:
+            if kw in title_lower:
+                return "comparison"
+
+        # 3. Trend overview: only if clearly a roundup/summary piece
+        trend_keywords = TYPE_DETECTION_KEYWORDS["trend_overview"]
+        for kw in trend_keywords:
+            if kw in title_lower:
+                return "trend_overview"
+
+        # Default: speed analysis (most versatile for news articles)
+        return "speed_analysis"
 
     def _get_system_prompt(self) -> str:
         """現在の日付を含むシステムプロンプトを生成"""
@@ -74,21 +145,32 @@ class ArticleGenerator:
 - 読者と一緒にワクワクしながら新技術を探検するスタンス
 - 「これ、ヤバくないですか？」「個人的に超アツい」など感情を表現
 
+【独自の深い分析を入れること】
+- 「なぜこの技術/ニュースが重要なのか」を必ず考察する
+- 「3年後にどう影響するか」の展望を入れる
+- 「現場エンジニアの日常がどう変わるか」を具体的に描く
+- 「知らないと損する」実践的な知見を提供する
+- 他のメディアでは読めない独自の視点を意識する
+
 【絶対に守ること】
 - {current_year_month}現在の最新情報として書く（古い情報は絶対に使わない）
 - 100円の価値を感じさせる「ここでしか読めない視点」を必ず入れる
 - 読み終わった後「読んでよかった！」と思わせる満足感を提供する"""
 
-    def generate(self, topic: Topic, is_free: bool = False) -> Article:
+    def generate(self, topic: Topic, is_free: bool = False, article_type: str = "speed_analysis") -> Article:
         """トピックから記事を生成
 
         Args:
             topic: 記事のトピック
             is_free: 無料記事として生成する場合はTrue
+            article_type: 記事タイプ (speed_analysis, comparison, practical_guide, trend_overview)
         """
-        prompt = self._build_prompt_free(topic) if is_free else self._build_prompt(topic)
+        if is_free:
+            prompt = self._build_prompt_free(topic, article_type=article_type)
+        else:
+            prompt = self._build_prompt(topic, article_type=article_type)
 
-        print(f"記事を生成中...")
+        print(f"記事を生成中... (タイプ: {ARTICLE_TYPES.get(article_type, {}).get('name', article_type)})")
         response = self.client.messages.create(
             model=self.model,
             max_tokens=8192,
@@ -106,7 +188,82 @@ class ArticleGenerator:
 
         return Article(title=title, content=content, tags=tags, thumbnail_prompt=thumbnail_prompt)
 
-    def _build_prompt(self, topic: Topic) -> str:
+    def _get_article_type_instructions(self, article_type: str) -> str:
+        """Get article type-specific writing instructions"""
+        type_info = ARTICLE_TYPES.get(article_type, ARTICLE_TYPES["speed_analysis"])
+
+        instructions = {
+            "speed_analysis": """## 記事タイプ: 速報解説型
+このニュースについて、単なる事実の羅列ではなく**深い考察と独自の視点**を提供してください。
+- なぜこのニュースが重要なのか（業界インパクト）
+- 3年後にどう影響するかの展望
+- 現場エンジニアの日常がどう変わるか
+- 知らないと損する実践的な知見""",
+
+            "comparison": """## 記事タイプ: 比較分析型
+2つ以上の技術/製品/手法を**公平かつ実践的に比較**してください。
+- 各技術の特徴を明確に整理
+- 「どんな人/チームにどれがおすすめか」を具体的に
+- 実際に使ってみた視点でのメリット・デメリット
+- 移行コストや学習曲線の比較""",
+
+            "practical_guide": """## 記事タイプ: 実践ガイド型
+読者が**記事を読みながら実際に手を動かせる**ような構成にしてください。
+- 前提条件と環境構築を明確に
+- ステップバイステップの手順
+- コード例は必ずコメント付きで
+- よくあるエラーとその解決法
+- 「次に何を学ぶべきか」のロードマップ""",
+
+            "trend_overview": """## 記事タイプ: トレンド俯瞰型
+今話題のトピックを**大局的な視点でまとめ**てください。
+- 注目すべきポイントを3-5個に絞る
+- 各トピックの関連性や共通トレンドを分析
+- 「これからどうなるか」の予測
+- エンジニアとして今準備すべきこと""",
+        }
+
+        return instructions.get(article_type, instructions["speed_analysis"])
+
+    def _get_note_format_rules(self) -> str:
+        """Get common note.com formatting rules"""
+        return """## note.com向けフォーマットルール（必ず守ること）
+
+【見出し】
+- 大見出し: ## を使用（セクションの区切りに）
+- 小見出し: ### を使用（サブセクションに）
+- # (h1)、#### (h4)以下は使用禁止
+
+【リスト】
+- 箇条書き: - を使用（* は使わない）
+- 番号付きリスト: 1. 2. 3. を使用
+- ネストしたリストは1段階まで（深いネストは避ける）
+- リスト項目間に空行を入れない
+
+【テキスト装飾】
+- 太字: **テキスト** （**の直後・直前にスペースを入れない）
+- 斜体は使用しない（noteで正しく表示されない）
+- 取り消し線は使用しない
+
+【引用・コード】
+- 引用: > を行頭に使用
+- コードブロック: ``` で囲む（言語指定なし、```python などは使わない）
+- インラインコード: `コード` 形式
+
+【禁止事項】
+- テーブル（表）は絶対に使用禁止 → 箇条書きで代替
+- 画像のマークダウン記法は使用しない
+- リンクの [テキスト](URL) 形式は使わない → URLは直接記載
+- 水平線 --- は使用しない
+- HTMLタグは使用しない
+
+【レイアウト】
+- 段落間は1行空ける
+- 見出しの前は1行空ける
+- リストの前後は1行空ける
+- コードブロックは10行以内を推奨"""
+
+    def _build_prompt(self, topic: Topic, article_type: str = "speed_analysis") -> str:
         """記事生成用のプロンプトを構築"""
         now = datetime.now()
         current_date = f"{now.year}年{now.month}月{now.day}日"
@@ -125,6 +282,22 @@ class ArticleGenerator:
         }
         category_hint = category_hints.get(topic.category, category_hints["tech"])
 
+        type_instructions = self._get_article_type_instructions(article_type)
+        format_rules = self._get_note_format_rules()
+
+        # Paywall structure guidance
+        paywall_structure = """## 有料ラインの構成ガイド
+「===ここから有料===」の**前**（無料プレビュー部分）には:
+- 読者の興味を引く問いかけや驚きの事実
+- 問題提起「〜って知ってました？実は...」
+- 記事の価値を感じさせるティーザー「この記事では〜を解説します」
+
+「===ここから有料===」の**後**（有料部分）には:
+- 具体的な解決策・ノウハウ・コード例
+- 深掘り分析と独自の考察
+- 実践Tips（明日から使える具体的アクション）
+- 業界の裏話・ぶっちゃけ話"""
+
         return f"""以下のトピックについて、note.comに投稿する有料記事を日本語で作成してください。
 
 【重要な注意事項】
@@ -142,6 +315,10 @@ class ArticleGenerator:
 
 ## カテゴリ別の注意点
 {category_hint}
+
+{type_instructions}
+
+{paywall_structure}
 
 ## 記事の要件（100円の価値を提供する）
 1. 読者は「へぇ〜！」「なるほど！」と声を出したくなる記事を期待しています
@@ -172,41 +349,7 @@ class ArticleGenerator:
 ---CONTENT---
 [記事本文（マークダウン形式、必ず「===ここから有料===」の行を含める）]
 
-## note.com向けフォーマットルール（必ず守ること）
-
-【見出し】
-- 大見出し: ## を使用（セクションの区切りに）
-- 小見出し: ### を使用（サブセクションに）
-- # (h1)、#### (h4)以下は使用禁止
-
-【リスト】
-- 箇条書き: - を使用（* は使わない）
-- 番号付きリスト: 1. 2. 3. を使用
-- ネストしたリストは1段階まで（深いネストは避ける）
-- リスト項目間に空行を入れない
-
-【テキスト装飾】
-- 太字: **テキスト** （**の直後・直前にスペースを入れない）
-- 斜体は使用しない（noteで正しく表示されない）
-- 取り消し線は使用しない
-
-【引用・コード】
-- 引用: > を行頭に使用
-- コードブロック: ``` で囲む（言語指定なし、```python などは使わない）
-- インラインコード: `コード` 形式
-
-【禁止事項】
-- テーブル（表）は絶対に使用禁止 → 箇条書きで代替
-- 画像のマークダウン記法は使用しない
-- リンクの [テキスト](URL) 形式は使わない → URLは直接記載
-- 水平線 --- は使用しない
-- HTMLタグは使用しない
-
-【レイアウト】
-- 段落間は1行空ける
-- 見出しの前は1行空ける
-- リストの前後は1行空ける
-- コードブロックは10行以内を推奨
+{format_rules}
 
 注意:
 - 事実に基づいて書いてください。憶測は「〜と考えられます」など明示してください
@@ -214,7 +357,7 @@ class ArticleGenerator:
 - タグは記事の内容に関連するものを幅広く選んでください
 - 「===ここから有料===」の行は必ず導入部分の後に入れてください"""
 
-    def _build_prompt_free(self, topic: Topic) -> str:
+    def _build_prompt_free(self, topic: Topic, article_type: str = "speed_analysis") -> str:
         """無料記事生成用のプロンプトを構築"""
         now = datetime.now()
         current_date = f"{now.year}年{now.month}月{now.day}日"
@@ -232,6 +375,18 @@ class ArticleGenerator:
             "tech": "テクノロジー全般のニュースとして、わかりやすく解説してください。",
         }
         category_hint = category_hints.get(topic.category, category_hints["tech"])
+
+        type_instructions = self._get_article_type_instructions(article_type)
+        format_rules = self._get_note_format_rules()
+
+        # Cross-promotion for free articles
+        cross_promo = """## 記事末尾の導線（必ず含めること）
+記事のまとめセクションの後に、以下のような導線テキストを追加してください：
+
+### もっと詳しく知りたい方へ
+この記事が参考になったら「スキ」を押していただけると嬉しいです！
+他にも技術トレンドの深掘り記事を毎日投稿しています。
+フォローしていただくと最新記事の通知が届きます。"""
 
         return f"""以下のトピックについて、note.comに投稿する**無料記事**を日本語で作成してください。
 
@@ -251,6 +406,8 @@ class ArticleGenerator:
 ## カテゴリ別の注意点
 {category_hint}
 
+{type_instructions}
+
 ## 記事の要件（無料でも価値ある記事を！）
 1. 読者は「へぇ〜！」「なるほど！」と声を出したくなる記事を期待しています
 2. 難しい概念は身近な例えで説明（例：「APIは料理の出前注文みたいなもの」）
@@ -267,6 +424,8 @@ class ArticleGenerator:
    - 実践Tips（「明日から使えるポイント」など箇条書きで）
    - まとめ（読者への熱いメッセージ）
 
+{cross_promo}
+
 ## 出力形式
 以下の形式で出力してください:
 
@@ -278,41 +437,7 @@ class ArticleGenerator:
 ---CONTENT---
 [記事本文（マークダウン形式）]
 
-## note.com向けフォーマットルール（必ず守ること）
-
-【見出し】
-- 大見出し: ## を使用（セクションの区切りに）
-- 小見出し: ### を使用（サブセクションに）
-- # (h1)、#### (h4)以下は使用禁止
-
-【リスト】
-- 箇条書き: - を使用（* は使わない）
-- 番号付きリスト: 1. 2. 3. を使用
-- ネストしたリストは1段階まで（深いネストは避ける）
-- リスト項目間に空行を入れない
-
-【テキスト装飾】
-- 太字: **テキスト** （**の直後・直前にスペースを入れない）
-- 斜体は使用しない（noteで正しく表示されない）
-- 取り消し線は使用しない
-
-【引用・コード】
-- 引用: > を行頭に使用
-- コードブロック: ``` で囲む（言語指定なし、```python などは使わない）
-- インラインコード: `コード` 形式
-
-【禁止事項】
-- テーブル（表）は絶対に使用禁止 → 箇条書きで代替
-- 画像のマークダウン記法は使用しない
-- リンクの [テキスト](URL) 形式は使わない → URLは直接記載
-- 水平線 --- は使用しない
-- HTMLタグは使用しない
-
-【レイアウト】
-- 段落間は1行空ける
-- 見出しの前は1行空ける
-- リストの前後は1行空ける
-- コードブロックは10行以内を推奨
+{format_rules}
 
 注意:
 - 事実に基づいて書いてください。憶測は「〜と考えられます」など明示してください
@@ -368,10 +493,11 @@ class ArticleGenerator:
         # 例: "**テキスト **" → "**テキスト**"
         # 例: "** テキスト**" → "**テキスト**"
 
-        # **の後のスペースを除去
-        text = re.sub(r'\*\*\s+', '**', text)
-        # **の前のスペースを除去
-        text = re.sub(r'\s+\*\*', '**', text)
+        # **の内側スペースのみを除去（外側のスペースは保持）
+        # 例: "text ** bold ** text" → "text **bold** text"
+        text = re.sub(r'\*\*\s+([^*]+?)\s+\*\*', r'**\1**', text)  # Both sides
+        text = re.sub(r'\*\*\s+([^*]+?)\*\*', r'**\1**', text)      # Left only
+        text = re.sub(r'\*\*([^*]+?)\s+\*\*', r'**\1**', text)      # Right only
 
         return text
 

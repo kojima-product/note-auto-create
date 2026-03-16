@@ -65,13 +65,31 @@ class PostedTracker:
                 return True
         return False
 
-    def mark_as_posted(self, url: str, title: str) -> None:
-        """トピックを投稿済みとしてマーク"""
+    def mark_as_posted(
+        self,
+        url: str,
+        title: str,
+        category: str = "",
+        tags: list[str] = None,
+        is_free: bool = True,
+        price: int = 0,
+        char_count: int = 0,
+        note_url: str = "",
+        article_type: str = "",
+    ) -> None:
+        """トピックを投稿済みとしてマーク（拡張メタデータ付き）"""
         if not self.is_posted(url):
             self.posted["topics"].append({
                 "url": url,
                 "title": title,
-                "posted_at": datetime.now().isoformat()
+                "posted_at": datetime.now().isoformat(),
+                "category": category,
+                "tags": tags or [],
+                "is_free": is_free,
+                "price": price,
+                "char_count": char_count,
+                "note_url": note_url,
+                "article_type": article_type,
             })
             self._save()
             print(f"  投稿済みとして記録: {title[:30]}...")

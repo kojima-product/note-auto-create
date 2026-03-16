@@ -102,18 +102,29 @@ class WebSearcher:
                 days=3,  # 過去3日間に限定（より新鮮なニュース）
             )
 
+            from .topic_collector import is_blocked_url, is_chinese_text
+
             results = []
+            filtered = 0
             for item in response.get("results", []):
+                url = item.get("url", "")
+                title = item.get("title", "")
+                if is_blocked_url(url) or is_chinese_text(title):
+                    filtered += 1
+                    continue
                 result = SearchResult(
-                    title=item.get("title", ""),
-                    url=item.get("url", ""),
+                    title=title,
+                    url=url,
                     content=item.get("content", "")[:500],
                     score=item.get("score", 0.0),
                     published_date=item.get("published_date"),
                 )
                 results.append(result)
 
-            print(f"  {len(results)}件の結果を取得")
+            if filtered:
+                print(f"  {len(results)}件の結果を取得（{filtered}件フィルタ除外）")
+            else:
+                print(f"  {len(results)}件の結果を取得")
             return results
 
         except Exception as e:
@@ -197,18 +208,24 @@ class WebSearcher:
                     days=7,  # 過去7日間（カスタム検索は少し広めに）
                 )
 
+                from .topic_collector import is_blocked_url, is_chinese_text
+
                 for item in response.get("results", []):
                     url = item.get("url", "")
-                    if url and url not in seen_urls:
-                        seen_urls.add(url)
-                        result = SearchResult(
-                            title=item.get("title", ""),
-                            url=url,
-                            content=item.get("content", "")[:1000],  # より多くのコンテンツ
-                            score=item.get("score", 0.0),
-                            published_date=item.get("published_date"),
-                        )
-                        all_results.append(result)
+                    title = item.get("title", "")
+                    if not url or url in seen_urls:
+                        continue
+                    if is_blocked_url(url) or is_chinese_text(title):
+                        continue
+                    seen_urls.add(url)
+                    result = SearchResult(
+                        title=title,
+                        url=url,
+                        content=item.get("content", "")[:1000],
+                        score=item.get("score", 0.0),
+                        published_date=item.get("published_date"),
+                    )
+                    all_results.append(result)
 
             except Exception as e:
                 print(f"  検索エラー ({query}): {e}")

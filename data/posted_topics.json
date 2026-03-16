@@ -2559,6 +2559,177 @@
       "url": "https://dev.classmethod.jp/articles/aws-trendcheck-202512-1/",
       "title": "2025年12月くらいのAWS最新情報ブログとかをキャッチ ...",
       "posted_at": "2026-03-15T06:14:12.052797"
+    },
+    {
+      "url": "https://atmarkit.itmedia.co.jp/ait/articles/2603/16/news011.html",
+      "title": "MCPは死んでない？　MCPの2026年ロードマップ公開　「AIツール接続」から「AI自律連携インフラ」へ",
+      "posted_at": "2026-03-16T08:09:42.019688",
+      "category": "ai",
+      "tags": [
+        "MCP",
+        "AI",
+        "ModelContextProtocol",
+        "LLM",
+        "AIエージェント",
+        "CLI",
+        "DevOps",
+        "AI連携",
+        "プログラミング"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 5167,
+      "note_url": "",
+      "article_type": "comparison"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/enterprise/articles/2603/16/news036.html",
+      "title": "高市政権、AIロボットで「世界シェア3割」目指す　関連技術への投資を本格化",
+      "posted_at": "2026-03-16T08:40:10.847055",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "AIロボット",
+        "フィジカルAI",
+        "高市政権",
+        "ロボティクス",
+        "製造業DX",
+        "国家戦略",
+        "エンジニアキャリア"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5222,
+      "note_url": "https://editor.note.com/notes/n58ad5c7f2b47/publish/",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://lp.startup-db.com/media/articles/funding-ranking-202507",
+      "title": "国内スタートアップ資金調達ランキング（2025年7月）",
+      "posted_at": "2026-03-16T08:46:21.780983",
+      "category": "ai",
+      "tags": [
+        "スタートアップ",
+        "資金調達",
+        "宇宙ビジネス",
+        "AI",
+        "インターステラテクノロジズ",
+        "ディープテック",
+        "エンジニアキャリア",
+        "テクノロジートレンド"
+      ],
+      "is_free": false,
+      "price": 200,
+      "char_count": 5394,
+      "note_url": "https://note.com/n/n78fc45956584",
+      "article_type": "trend_overview"
+    },
+    {
+      "url": "https://www.gizmodo.jp/2025/11/best-gadget-2025.html",
+      "title": "ギズモードが選ぶ2025年ベストガジェット。今年最強だったのは ...",
+      "posted_at": "2026-03-16T09:01:38.254537",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "ガジェット",
+        "スマートフォン",
+        "iPhone17",
+        "GalaxyS25Ultra",
+        "Pixel9a",
+        "TensorG4",
+        "エッジAI",
+        "テクノロジー"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5097,
+      "note_url": "https://note.com/info/n/n156fc772cf70",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://devworks.jp/blog/229",
+      "title": "2025年版｜今どきのフロントエンド技術＆トレンドまるっと解説！",
+      "posted_at": "2026-03-16T09:16:07.763220",
+      "category": "ai",
+      "tags": [
+        "フロントエンド",
+        "React",
+        "Svelte",
+        "AI",
+        "TailwindCSS",
+        "PWA",
+        "Web開発",
+        "JavaScript",
+        "トレンド2026"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5393,
+      "note_url": "https://note.com/kojima_product/n/n42b57ef1554f",
+      "article_type": "trend_overview"
+    },
+    {
+      "url": "https://www.cyber.go.jp/pdf/policy/kihon-s/250627cs2025.pdf",
+      "title": "[PDF] サイバーセキュリティ 2025 （2024 年度年次報告・2025 年度年次 ...",
+      "posted_at": "2026-03-16T09:22:38.882852",
+      "category": "ai",
+      "tags": [
+        "サイバーセキュリティ",
+        "能動的サイバー防御",
+        "セキュリティ",
+        "AI",
+        "エンジニア",
+        "法制度",
+        "インフラ",
+        "DevSecOps"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5448,
+      "note_url": "https://note.com/kojima_product/n/n305d6586dc95",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://xtech.nikkei.com/atcl/nxt/info/18/00001/121900239/",
+      "title": "2025年12月24日の新聞広告に掲載した日経クロステックの ...",
+      "posted_at": "2026-03-16T09:42:15.565783",
+      "category": "ai",
+      "tags": [
+        "サイバーセキュリティ",
+        "AI",
+        "富士通",
+        "ラピダス",
+        "半導体",
+        "MONAKA",
+        "パナソニック",
+        "セキュリティ対策"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5285,
+      "note_url": "",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://rikkeisoft.com/ja/blog-2/top-10-tech-trends-for-2025/",
+      "title": "2025年の10大テクノロジートレンド：ガートナー発表 - Rikkeisoft",
+      "posted_at": "2026-03-16T09:49:16.251036",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "テクノロジートレンド",
+        "ガートナー",
+        "量子コンピュータ",
+        "空間コンピューティング",
+        "自律ロボット",
+        "ポスト量子暗号",
+        "エンジニアキャリア"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5390,
+      "note_url": "https://note.com/kojima_product/n/n6a338337b8dc",
+      "article_type": "trend_overview"
     }
   ]
 }

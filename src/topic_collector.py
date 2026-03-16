@@ -1,14 +1,17 @@
 """トピック収集モジュール - RSSフィードとWeb検索からAI/プログラミング関連ニュースを取得"""
 
 import feedparser
+import unicodedata
 import yaml
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from pydantic import BaseModel
 from typing import Optional
+from urllib.parse import urlparse
 import time
 
 from .web_searcher import WebSearcher
+from .performance_analyzer import PerformanceAnalyzer
 
 
 class Topic(BaseModel):
@@ -23,6 +26,56 @@ class Topic(BaseModel):
     score: float = 0.0
 
 
+# Blocked domains that produce low-quality content for Japanese tech blog
+BLOCKED_DOMAINS = {
+    # Chinese sites (not target audience)
+    "blog.csdn.net", "juejin.cn", "zhihu.com", "cnblogs.com", "sina.com.cn",
+    "mofcloud.cn", "iyiou.com", "cloudinsight.cc", "taobao.com", "moomoo.com",
+    "baidu.com", "163.com", "qq.com", "sohu.com", "aliyun.com", "tencent.com",
+    # SNS (thin content)
+    "facebook.com", "threads.net", "reddit.com", "x.com", "twitter.com",
+    # Video (not suitable for text articles)
+    "youtube.com", "youtu.be", "bilibili.com", "nicovideo.jp",
+    # News aggregators (non-original content)
+    "news.cnyes.com", "today.line.me", "hk.news.yahoo.com",
+    # Press release aggregators (zero added value)
+    "prtimes.jp",
+}
+
+
+def is_blocked_url(url: str) -> bool:
+    """Check if URL belongs to a blocked domain"""
+    try:
+        hostname = urlparse(url).hostname or ""
+        # Match domain and subdomains (e.g. "m.youtube.com" matches "youtube.com")
+        for blocked in BLOCKED_DOMAINS:
+            if hostname == blocked or hostname.endswith("." + blocked):
+                return True
+    except Exception:
+        pass
+    return False
+
+
+def is_chinese_text(text: str) -> bool:
+    """Detect if text is Chinese (not Japanese) by checking for CJK without kana"""
+    if not text:
+        return False
+    has_cjk = False
+    has_kana = False
+    for ch in text:
+        cat = unicodedata.category(ch)
+        if cat == "Lo":  # Letter, other (includes CJK and kana)
+            cp = ord(ch)
+            # Hiragana: U+3040-U+309F, Katakana: U+30A0-U+30FF
+            if 0x3040 <= cp <= 0x30FF:
+                has_kana = True
+            # CJK Unified Ideographs: U+4E00-U+9FFF
+            elif 0x4E00 <= cp <= 0x9FFF:
+                has_cjk = True
+    # Chinese = has CJK ideographs but no Japanese kana
+    return has_cjk and not has_kana
+
+
 class TopicCollector:
     """RSSフィードからトピックを収集するクラス"""
 
@@ -31,6 +84,14 @@ class TopicCollector:
         self.feeds = self.config.get("feeds", [])
         self.selection = self.config.get("selection", {})
         self.web_searcher = WebSearcher() if use_web_search else None
+        self._analyzer = None
+
+    @property
+    def analyzer(self) -> PerformanceAnalyzer:
+        """Lazy-load performance analyzer"""
+        if self._analyzer is None:
+            self._analyzer = PerformanceAnalyzer()
+        return self._analyzer
 
     def _load_config(self, config_path: str) -> dict:
         """設定ファイルを読み込む"""
@@ -60,37 +121,36 @@ class TopicCollector:
         # 500文字で切り詰め
         return clean[:500].strip()
 
-    def _calculate_score(self, topic: Topic) -> float:
-        """トピックのスコアを計算（高いほど優先）"""
+    def _calculate_base_score(self, topic: Topic) -> float:
+        """Calculate base score using fixed rules (original logic)"""
         score = 0.0
 
-        # カテゴリ優先度
+        # Category priority
         priority_categories = self.selection.get("priority_categories", ["ai", "tech"])
         if topic.category in priority_categories:
             score += (len(priority_categories) - priority_categories.index(topic.category)) * 10
 
-        # 言語優先度（日本語を大幅に優先）
+        # Language priority (strongly prefer Japanese)
         if topic.language == self.selection.get("priority_language", "ja"):
             score += 30
 
-        # 新しさ（新しいほど高得点 - 今週のニュースを優先）
+        # Freshness (newer = higher)
         if topic.published:
             age = datetime.now(timezone.utc) - topic.published
             if age < timedelta(hours=12):
-                score += 25  # 12時間以内は最優先
+                score += 25
             elif age < timedelta(hours=24):
-                score += 20  # 24時間以内
+                score += 20
             elif age < timedelta(hours=48):
-                score += 15  # 48時間以内
+                score += 15
             elif age < timedelta(days=3):
-                score += 10  # 3日以内
+                score += 10
             elif age < timedelta(days=7):
-                score += 5   # 1週間以内
+                score += 5
 
-        # 注目キーワードで加点（多様なトピック対応）
+        # Keyword bonuses
         title_lower = topic.title.lower()
 
-        # AI関連（高加点）
         ai_keywords = ["ai", "人工知能", "機械学習", "llm", "gpt", "claude", "生成ai",
                        "chatgpt", "openai", "anthropic", "gemini", "copilot"]
         for keyword in ai_keywords:
@@ -98,7 +158,6 @@ class TopicCollector:
                 score += 4
                 break
 
-        # プログラミング言語・フレームワーク
         prog_keywords = ["python", "javascript", "typescript", "rust", "go言語", "golang",
                          "react", "next.js", "vue", "node.js", "deno", "bun"]
         for keyword in prog_keywords:
@@ -106,7 +165,6 @@ class TopicCollector:
                 score += 3
                 break
 
-        # DevOps・クラウド
         devops_keywords = ["aws", "azure", "gcp", "docker", "kubernetes", "k8s",
                            "terraform", "ci/cd", "devops"]
         for keyword in devops_keywords:
@@ -114,7 +172,6 @@ class TopicCollector:
                 score += 3
                 break
 
-        # セキュリティ
         security_keywords = ["セキュリティ", "脆弱性", "攻撃", "ハッキング", "security",
                              "vulnerability", "cve"]
         for keyword in security_keywords:
@@ -122,7 +179,6 @@ class TopicCollector:
                 score += 3
                 break
 
-        # トレンド・注目ワード
         trend_keywords = ["新機能", "発表", "リリース", "アップデート", "launch",
                           "release", "announce", "新登場", "話題"]
         for keyword in trend_keywords:
@@ -131,6 +187,50 @@ class TopicCollector:
                 break
 
         return score
+
+    def _calculate_performance_score(self, topic: Topic) -> float:
+        """Calculate score based on actual performance data"""
+        score = 0.0
+
+        # Category-based weight from performance data
+        cat_weights = self.analyzer.get_category_score_weights()
+        if topic.category in cat_weights:
+            score += cat_weights[topic.category]
+        else:
+            score += 10.0  # Default for unknown categories
+
+        # Language and freshness bonuses still apply
+        if topic.language == self.selection.get("priority_language", "ja"):
+            score += 30
+
+        if topic.published:
+            age = datetime.now(timezone.utc) - topic.published
+            if age < timedelta(hours=12):
+                score += 25
+            elif age < timedelta(hours=24):
+                score += 20
+            elif age < timedelta(hours=48):
+                score += 15
+            elif age < timedelta(days=3):
+                score += 10
+            elif age < timedelta(days=7):
+                score += 5
+
+        return score
+
+    def _calculate_score(self, topic: Topic) -> float:
+        """Hybrid scoring: blend fixed rules with performance data based on confidence"""
+        base_score = self._calculate_base_score(topic)
+
+        # If no performance data, use base score only
+        confidence = self.analyzer.confidence
+        if confidence == 0:
+            return base_score
+
+        performance_score = self._calculate_performance_score(topic)
+
+        # Blend: more data = more weight on performance
+        return base_score * (1 - confidence) + performance_score * confidence
 
     def _fetch_from_web_search(self) -> list[Topic]:
         """Web検索からトピックを取得"""
@@ -162,12 +262,21 @@ class TopicCollector:
         max_age = timedelta(days=self.selection.get("max_age_days", 3))
         now = datetime.now(timezone.utc)
 
+        filtered_count = 0
+
         # Web検索からトピックを取得（有効な場合）
         if self.web_searcher and self.web_searcher.enabled:
             print("Web検索からトピックを取得中...")
             web_topics = self._fetch_from_web_search()
-            topics.extend(web_topics)
-            print(f"  Web検索から{len(web_topics)}件取得")
+            # Apply quality filters
+            for t in web_topics:
+                if is_blocked_url(t.link):
+                    filtered_count += 1
+                elif is_chinese_text(t.title):
+                    filtered_count += 1
+                else:
+                    topics.append(t)
+            print(f"  Web検索から{len(web_topics) - filtered_count}件取得（{filtered_count}件フィルタ除外）")
 
         # RSSフィードからトピックを取得
         print("RSSフィードからトピックを取得中...")
@@ -189,6 +298,14 @@ class TopicCollector:
                     elif hasattr(entry, "description"):
                         summary = self._clean_summary(entry.description)
 
+                    # Quality filter: skip blocked URLs and Chinese text
+                    if is_blocked_url(entry.link):
+                        filtered_count += 1
+                        continue
+                    if is_chinese_text(entry.title):
+                        filtered_count += 1
+                        continue
+
                     topic = Topic(
                         title=entry.title,
                         link=entry.link,
@@ -207,6 +324,9 @@ class TopicCollector:
             except Exception as e:
                 print(f"  エラー: {feed_config['name']} - {e}")
                 continue
+
+        if filtered_count > 0:
+            print(f"  品質フィルタで{filtered_count}件を除外しました")
 
         return topics
 
