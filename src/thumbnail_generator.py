@@ -178,42 +178,31 @@ class ThumbnailGenerator:
         return self.generate(prompt)
 
     def _create_japanese_prompt(self, title: str, tags: List[str] = None) -> str:
-        """タイトル内容に沿ったAI×アニメ融合スタイルのサムネイルを生成
-
-        戦略:
-        - タイトルをGeminiに渡し、内容に最適なシーンを生成させる
-        - AIアート×アニメの融合スタイルで統一感 + 目を引くビジュアル
-        - シームレスで未来的、かつ漫画的なエネルギー感
-        """
+        """タイトル内容に沿った4コマ漫画風サムネイルを生成"""
         tag_str = ', '.join(tags[:5]) if tags else ''
 
-        prompt = f"""Generate a stunning tech blog thumbnail image for this article:
+        prompt = f"""Create a 4-panel comic style tech blog thumbnail for this article.
 Title: "{title}"
 Tags: {tag_str}
 
-IMPORTANT: The visual must directly represent the article's specific topic.
-Choose the scene that a reader would immediately associate with this article's content.
+CORE GOAL:
+- The story in all 4 panels must clearly reflect the article topic.
+- A reader should understand the theme at a glance, even without text.
 
-ART STYLE — "AI × Anime Fusion":
-- Seamless blend of anime/manga aesthetics with futuristic AI-generated art
-- Vibrant neon color palette: electric blue, hot pink, cyan, purple gradients
-- Glowing particle effects, light trails, and energy flows throughout
-- Anime-inspired dynamic composition with dramatic perspective and motion lines
-- Holographic UI elements and floating data visualizations woven into the scene
-- Cel-shaded lighting mixed with volumetric god rays
-- The overall feel should be like a key visual from a sci-fi anime (Ghost in the Shell, Psycho-Pass, Cyberpunk Edgerunners)
+LAYOUT (MANDATORY):
+- Exactly 4 comic panels in one horizontal image.
+- Panels arranged left to right with clear borders/gutters.
+- Panel flow: setup -> challenge -> insight -> outcome.
 
-COMPOSITION:
-- Wide cinematic landscape format (1.91:1)
-- Main visual element in center-left with dramatic depth
-- Background has atmospheric depth with bokeh-like glowing particles
-- Seamless flow — no hard panel borders, everything blends together
+STYLE:
+- Japanese manga-inspired, clean line art, colorful and high contrast.
+- Modern AI/tech visual motifs when relevant (UI, code, devices, data flow).
+- Expressive motion and storytelling, but keep it clean and easy to read.
 
 STRICT RULES:
-- NO text, letters, numbers, words, or watermarks anywhere
-- NO speech bubbles or comic panels
-- NO realistic human faces (stylized silhouettes or abstract figures are OK)
-- Emphasis on atmosphere, technology, and energy — not characters
+- NO text, letters, words, numbers, logos, or watermarks anywhere.
+- NO speech bubbles with text.
+- Keep characters stylized (avoid hyper-realistic faces).
 
 Dimensions: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT} pixels, landscape."""
 
@@ -226,19 +215,25 @@ Dimensions: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT} pixels, lan
         if tags:
             tag_str = f" Keywords: {', '.join(tags[:5])}"
 
-        # 基本プロンプト（英語で画像の概念を説明）
-        prompt = f"""Create a tech blog thumbnail image for: "{title}".{tag_str}
+        # 基本プロンプト（4コマ漫画スタイル）
+        prompt = f"""Create a 4-panel comic style tech blog thumbnail for: "{title}".{tag_str}
 
 Image specifications:
 - Dimensions: {self.NOTE_THUMBNAIL_WIDTH}x{self.NOTE_THUMBNAIL_HEIGHT} pixels (landscape)
 - Aspect ratio: 1.91:1 (blog thumbnail format)
+- Exactly 4 panels with visible borders/gutters, read left-to-right
+
+Story flow requirements:
+- Panel 1: setup
+- Panel 2: challenge
+- Panel 3: insight/discovery
+- Panel 4: conclusion/outcome
 
 Design requirements:
-- Modern, professional tech blog aesthetic
-- Vibrant gradients and eye-catching colors
-- Abstract visual representation of the topic
-- NO text or letters in the image
-- Clean, simple composition"""
+- Manga-inspired visual storytelling with dynamic composition
+- Topic-specific scenes (not generic abstract art)
+- NO text, letters, numbers, logos, or watermarks
+- No speech-bubble text"""
 
         return prompt
 
