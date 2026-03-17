@@ -98,12 +98,42 @@ def login(page: Page, email: str = None, password: str = None) -> bool:
         return False
 
     try:
-        page.wait_for_url("**/", timeout=30000)
-        time.sleep(3)
+        # note側のUI/遷移遅延に備えて、URL固定ではなくログイン離脱を判定する
+        page.wait_for_url(lambda url: "note.com/login" not in url, timeout=45000)
+        page.wait_for_load_state("domcontentloaded")
+        time.sleep(2)
         page.screenshot(path="debug_after_login.png")
-        print("  ログイン後のスクリーンショットを保存")
+        print(f"  ログイン成功（URL遷移）: {page.url}")
         return True
     except Exception as e:
-        print(f"  ログイン後の画面遷移エラー: {e}")
+        print(f"  ログイン後のURL遷移待機がタイムアウト: {e}")
+
+        # フォールバック: URLが変わらなくても、ログイン済みUIが出ていれば成功扱い
+        try:
+            page.wait_for_load_state("networkidle", timeout=15000)
+        except Exception:
+            pass
+
+        current_url = page.url
+        if "note.com/login" not in current_url:
+            page.screenshot(path="debug_after_login_url_only.png")
+            print(f"  ログイン成功（URL判定フォールバック）: {current_url}")
+            return True
+
+        # よくあるログイン失敗メッセージを検知
+        error_selectors = [
+            'text="メールアドレスまたはパスワードが違います"',
+            'text="ログインに失敗しました"',
+            'text="認証に失敗"',
+        ]
+        for sel in error_selectors:
+            try:
+                if page.locator(sel).first.is_visible():
+                    print(f"  ログイン失敗メッセージを検知: {sel}")
+                    page.screenshot(path="debug_login_failed_message.png")
+                    return False
+            except Exception:
+                continue
+
         page.screenshot(path="debug_login_failed.png")
         return False
