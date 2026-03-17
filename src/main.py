@@ -230,20 +230,31 @@ def create_single_article(
             article_type = f"有料記事（{price}円・動的価格）"
             print(f"  価格再計算（実文字数）: {price}円")
 
-    # Quality gate: validate article before proceeding
-    passed, issues = validate_article_quality(article, is_free)
-    if not passed:
-        print(f"\n{prefix}品質ゲート: 不合格")
-        for issue in issues:
-            print(f"  - {issue}")
-        result["error"] = f"品質チェック不合格: {'; '.join(issues)}"
-        if notifier:
-            notifier.send_notification(
-                article_title=article.title,
-                success=False,
-                details=f"品質チェック不合格:\n" + "\n".join(f"- {i}" for i in issues)
-            )
-        return result
+    # Quality gate: validate article before proceeding (with retry)
+    max_retries = 2
+    for attempt in range(max_retries + 1):
+        passed, issues = validate_article_quality(article, is_free)
+        if passed:
+            break
+        if attempt < max_retries:
+            print(f"\n{prefix}品質ゲート: 不合格（リトライ {attempt + 1}/{max_retries}）")
+            for issue in issues:
+                print(f"  - {issue}")
+            print(f"{prefix}記事を再生成中...")
+            article = generator.generate(topic, is_free=is_free, article_type=detected_article_type)
+            print(f"  文字数: {len(article.content)} 文字")
+        else:
+            print(f"\n{prefix}品質ゲート: 不合格（リトライ上限）")
+            for issue in issues:
+                print(f"  - {issue}")
+            result["error"] = f"品質チェック不合格: {'; '.join(issues)}"
+            if notifier:
+                notifier.send_notification(
+                    article_title=article.title,
+                    success=False,
+                    details=f"品質チェック不合格:\n" + "\n".join(f"- {i}" for i in issues)
+                )
+            return result
     print(f"  品質ゲート: 合格")
 
     # サムネイル画像を生成
@@ -641,7 +652,7 @@ def main():
     # 生成されたファイルをクリーンアップ（リポジトリを軽く保つため）
     cleanup_generated_files()
 
-    if fail_count > 0:
+    if success_count == 0 and fail_count > 0:
         sys.exit(1)
 
 
