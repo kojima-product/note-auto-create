@@ -90,6 +90,7 @@ jobs:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NOTE_SESSION: ${{ secrets.NOTE_SESSION }}
           USE_MODEL: ${{ github.event.inputs.model || 'sonnet' }}
           CUSTOM_TOPIC: ${{ github.event.inputs.custom_topic }}
           INPUT_COUNT: ${{ github.event.inputs.count || '3' }}
