@@ -2856,6 +2856,27 @@
       "char_count": 5921,
       "note_url": "https://note.com/kojima_product/n/ne00410979cd4",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2603/18/news071.html",
+      "title": "OpenAI、「ChatGPT」でモデル管理を改善　応答スタイル「探究心が強い」は廃止",
+      "posted_at": "2026-03-18T01:55:41.820480",
+      "category": "ai",
+      "tags": [
+        "ChatGPT",
+        "OpenAI",
+        "AI",
+        "LLM",
+        "生成AI",
+        "AIツール",
+        "エンジニア",
+        "テクノロジー"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5020,
+      "note_url": "https://note.com/kojima_product/n/n67c134db3908",
+      "article_type": "speed_analysis"
     }
   ]
 }
