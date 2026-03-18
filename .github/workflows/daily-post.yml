@@ -153,6 +153,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add data/posted_topics.json data/article_stats.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Update posted topics [skip ci]"
+          git pull --rebase origin main
           git push
 
   # Weekly performance report (Sundays at 23:00 UTC = Mondays 8:00 JST)
