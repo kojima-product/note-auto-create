@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-03-16T01:16:47.122267",
+  "last_updated": "2026-03-17T01:42:57.788258",
   "articles": [
     {
       "title": "アクセス状況",
@@ -8,13 +8,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.066318",
+      "scraped_at": "2026-03-17T01:42:57.735147",
       "source_url": "http://codezine.jp/article/detail/22911",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-28T05:39:11.215053"
+      "posted_at": "2025-12-28T05:39:11.215053",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.066318"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.930289"
+        }
+      ]
     },
     {
       "title": "もっと読まれるには",
@@ -23,13 +39,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.068190",
+      "scraped_at": "2026-03-17T01:42:57.737030",
       "source_url": "https://www.itmedia.co.jp/aiplus/articles/2512/26/news112.html",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-27T04:25:47.814966"
+      "posted_at": "2025-12-27T04:25:47.814966",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.068190"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.932094"
+        }
+      ]
     },
     {
       "title": "noteのはじめかた",
@@ -38,13 +70,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.070071",
+      "scraped_at": "2026-03-17T01:42:57.738931",
       "source_url": "https://atmarkit.itmedia.co.jp/ait/articles/2512/16/news047.html",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-16T05:33:40.533115"
+      "posted_at": "2025-12-16T05:33:40.533115",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.070071"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.933897"
+        }
+      ]
     },
     {
       "title": "もっとも大事なこと",
@@ -53,13 +101,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.071924",
+      "scraped_at": "2026-03-17T01:42:57.740795",
       "source_url": "https://www.itmedia.co.jp/news/articles/2512/28/news037.html",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-29T02:25:59.697378"
+      "posted_at": "2025-12-29T02:25:59.697378",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.071924"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.935656"
+        }
+      ]
     },
     {
       "title": "本文を書くときのポイント",
@@ -68,13 +132,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.073875",
+      "scraped_at": "2026-03-17T01:42:57.742770",
       "source_url": "https://www.itmedia.co.jp/aiplus/articles/2601/06/news015.html",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2026-01-06T14:15:44.742336"
+      "posted_at": "2026-01-06T14:15:44.742336",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.073875"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.937521"
+        }
+      ]
     },
     {
       "title": "タイトルと見出し画像のコツ",
@@ -83,13 +163,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.075858",
+      "scraped_at": "2026-03-17T01:42:57.744788",
       "source_url": "http://codezine.jp/article/detail/22691",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-29T05:36:27.150244"
+      "posted_at": "2025-12-29T05:36:27.150244",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.075858"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.939416"
+        }
+      ]
     },
     {
       "title": "noteをもっと使いこなそう",
@@ -98,13 +194,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.077864",
+      "scraped_at": "2026-03-17T01:42:57.746818",
       "source_url": "https://www.eesel.ai/ja/blog/google-gemini-3",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-07T23:39:05.134112"
+      "posted_at": "2025-12-07T23:39:05.134112",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.077864"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.941338"
+        }
+      ]
     },
     {
       "title": "SNSと連携してシェア",
@@ -113,13 +225,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.079766",
+      "scraped_at": "2026-03-17T01:42:57.748749",
       "source_url": "https://jp.security.ntt/insights_resources/tech_blog/react2shell_malware_zndoor/",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-14T02:26:13.911280"
+      "posted_at": "2025-12-14T02:26:13.911280",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.079766"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.943172"
+        }
+      ]
     },
     {
       "title": "読者へのお礼を設定する",
@@ -128,13 +256,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.081678",
+      "scraped_at": "2026-03-17T01:42:57.750698",
       "source_url": "https://www.itmedia.co.jp/news/articles/2602/03/news060.html",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2026-02-03T06:05:56.001386"
+      "posted_at": "2026-02-03T06:05:56.001386",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.081678"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.945009"
+        }
+      ]
     },
     {
       "title": "記事をマガジンにまとめる",
@@ -143,13 +287,29 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.083659",
+      "scraped_at": "2026-03-17T01:42:57.752678",
       "source_url": "https://note.com/ai_solution/n/ne97564d9f251",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-14T01:21:56.618859"
+      "posted_at": "2025-12-14T01:21:56.618859",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.083659"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.946901"
+        }
+      ]
     },
     {
       "title": "コンテスト・お題に参加する",
@@ -158,7 +318,23 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.085657"
+      "scraped_at": "2026-03-17T01:42:57.754674",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.085657"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.948874"
+        }
+      ]
     },
     {
       "title": "クリエイターとしてのキャリアを伸ばすために",
@@ -167,61 +343,141 @@
       "likes": 0,
       "purchases": 0,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.087916"
+      "scraped_at": "2026-03-17T01:42:57.756945",
+      "history": [
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.087916"
+        },
+        {
+          "views": 0,
+          "likes": 0,
+          "purchases": 0,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.951077"
+        }
+      ]
     },
     {
       "title": "🤖 Claude Codeがおバカちゃんになった件について - 賢い子に戻す方法",
       "note_url": "",
-      "views": 1371,
+      "views": 1375,
       "likes": 1,
       "purchases": 19,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.090523",
+      "scraped_at": "2026-03-17T01:42:57.759695",
       "source_url": "https://atmarkit.itmedia.co.jp/ait/articles/2510/22/news027.html",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-20T00:27:57.885325"
+      "posted_at": "2025-12-20T00:27:57.885325",
+      "history": [
+        {
+          "views": 1371,
+          "likes": 1,
+          "purchases": 19,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.090523"
+        },
+        {
+          "views": 1371,
+          "likes": 1,
+          "purchases": 19,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.953542"
+        }
+      ]
     },
     {
       "title": "【自己紹介】福岡で不動産とAIと野菜を育てる変わり種28歳エンジニアの話",
       "note_url": "",
-      "views": 978,
+      "views": 979,
       "likes": 8,
-      "purchases": 520,
+      "purchases": 521,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.093143",
+      "scraped_at": "2026-03-17T01:42:57.762353",
       "source_url": "https://miralab.co.jp/media/category/news/",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-09T13:14:18.132729"
+      "posted_at": "2025-12-09T13:14:18.132729",
+      "history": [
+        {
+          "views": 978,
+          "likes": 8,
+          "purchases": 520,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.093143"
+        },
+        {
+          "views": 978,
+          "likes": 8,
+          "purchases": 520,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.956020"
+        }
+      ]
     },
     {
       "title": "World Appとは？最近話題のデジタルIDアプリを徹底解説🌏",
       "note_url": "",
-      "views": 840,
+      "views": 841,
       "likes": 2,
-      "purchases": 166,
+      "purchases": 175,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.095645",
+      "scraped_at": "2026-03-17T01:42:57.764908",
       "source_url": "https://miralab.co.jp/media/category/news/",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-09T13:14:18.132729"
+      "posted_at": "2025-12-09T13:14:18.132729",
+      "history": [
+        {
+          "views": 840,
+          "likes": 2,
+          "purchases": 166,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.095645"
+        },
+        {
+          "views": 840,
+          "likes": 2,
+          "purchases": 166,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.958378"
+        }
+      ]
     },
     {
       "title": "【実録】メール送信で地獄を見た私が、Resendに出会って人生が変わった話",
       "note_url": "",
-      "views": 674,
+      "views": 681,
       "likes": 0,
       "purchases": 34,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.098272"
+      "scraped_at": "2026-03-17T01:42:57.767581",
+      "history": [
+        {
+          "views": 674,
+          "likes": 0,
+          "purchases": 34,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.098272"
+        },
+        {
+          "views": 674,
+          "likes": 0,
+          "purchases": 34,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.960840"
+        }
+      ]
     },
     {
       "title": "【Windows民歓喜】Macの最強ランチャー「Raycast」で、あの便利機能が全部使える件",
@@ -230,13 +486,29 @@
       "likes": 0,
       "purchases": 19,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.100738",
+      "scraped_at": "2026-03-17T01:42:57.770091",
       "source_url": "https://miralab.co.jp/media/category/news/",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-09T13:14:18.132729"
+      "posted_at": "2025-12-09T13:14:18.132729",
+      "history": [
+        {
+          "views": 594,
+          "likes": 0,
+          "purchases": 19,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.100738"
+        },
+        {
+          "views": 594,
+          "likes": 0,
+          "purchases": 19,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.963287"
+        }
+      ]
     },
     {
       "title": "マリオットボンヴォイカード大改悪！年会費8万円時代に突入した衝撃の真相",
@@ -245,7 +517,23 @@
       "likes": 2,
       "purchases": 24,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.103355"
+      "scraped_at": "2026-03-17T01:42:57.772728",
+      "history": [
+        {
+          "views": 545,
+          "likes": 2,
+          "purchases": 24,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.103355"
+        },
+        {
+          "views": 545,
+          "likes": 2,
+          "purchases": 24,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.965768"
+        }
+      ]
     },
     {
       "title": "【五感で愉しむ】リッツカールトン福岡で過ごした非日常体験｜マリオットカード無料宿泊を使い倒してきた話",
@@ -254,7 +542,23 @@
       "likes": 0,
       "purchases": 32,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.105724"
+      "scraped_at": "2026-03-17T01:42:57.775107",
+      "history": [
+        {
+          "views": 467,
+          "likes": 0,
+          "purchases": 32,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.105724"
+        },
+        {
+          "views": 467,
+          "likes": 0,
+          "purchases": 32,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.968107"
+        }
+      ]
     },
     {
       "title": "【まとめ】ハイパーカジュアルゲームって何？最近めちゃくちゃ気になったので調べてみた 🎮",
@@ -263,37 +567,85 @@
       "likes": 0,
       "purchases": 14,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.108585"
+      "scraped_at": "2026-03-17T01:42:57.777817",
+      "history": [
+        {
+          "views": 457,
+          "likes": 0,
+          "purchases": 14,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.108585"
+        },
+        {
+          "views": 457,
+          "likes": 0,
+          "purchases": 14,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.970597"
+        }
+      ]
     },
     {
       "title": "【2026年最新】Rust vs Go、結局どっち選ぶべき？現場のリアルな比較で決着つけます🦀🐹",
       "note_url": "",
-      "views": 413,
+      "views": 419,
       "likes": 0,
       "purchases": 4,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.112988",
+      "scraped_at": "2026-03-17T01:42:57.780540",
       "source_url": "https://note.com/kojima_product/n/n3534adc1416a",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2026-02-07T04:44:06.562441"
+      "posted_at": "2026-02-07T04:44:06.562441",
+      "history": [
+        {
+          "views": 413,
+          "likes": 0,
+          "purchases": 4,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.112988"
+        },
+        {
+          "views": 413,
+          "likes": 0,
+          "purchases": 4,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.973117"
+        }
+      ]
     },
     {
       "title": "【徹底解説】東大発AIベンチャー「AICE株式会社」の実績と挑戦｜かんぽ生命との共創からローカルLLM開発まで",
       "note_url": "",
-      "views": 401,
+      "views": 405,
       "likes": 0,
       "purchases": 19,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.116309",
+      "scraped_at": "2026-03-17T01:42:57.783078",
       "source_url": "https://miralab.co.jp/media/category/news/",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-09T13:14:18.132729"
+      "posted_at": "2025-12-09T13:14:18.132729",
+      "history": [
+        {
+          "views": 401,
+          "likes": 0,
+          "purchases": 19,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.116309"
+        },
+        {
+          "views": 401,
+          "likes": 0,
+          "purchases": 19,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.975521"
+        }
+      ]
     },
     {
       "title": "【初心者向け】Storybookって何？ReactとViteで始めるコンポーネント開発の新世界 🎨",
@@ -302,13 +654,29 @@
       "likes": 0,
       "purchases": 21,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.119406",
+      "scraped_at": "2026-03-17T01:42:57.785563",
       "source_url": "https://miralab.co.jp/media/category/news/",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-09T13:14:18.132729"
+      "posted_at": "2025-12-09T13:14:18.132729",
+      "history": [
+        {
+          "views": 367,
+          "likes": 0,
+          "purchases": 21,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.119406"
+        },
+        {
+          "views": 367,
+          "likes": 0,
+          "purchases": 21,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.977934"
+        }
+      ]
     },
     {
       "title": "shadcn/ui完全解説：なぜエンジニアは「コピペUI」に夢中になるのか",
@@ -317,13 +685,29 @@
       "likes": 0,
       "purchases": 29,
       "revenue": 0,
-      "scraped_at": "2026-03-16T01:16:47.122256",
+      "scraped_at": "2026-03-17T01:42:57.788188",
       "source_url": "https://www.itmedia.co.jp/aiplus/articles/2512/08/news096.html",
       "category": "",
       "tags": [],
       "is_free": true,
       "price": 0,
-      "posted_at": "2025-12-08T11:19:47.131711"
+      "posted_at": "2025-12-08T11:19:47.131711",
+      "history": [
+        {
+          "views": 365,
+          "likes": 0,
+          "purchases": 29,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:16:47.122256"
+        },
+        {
+          "views": 365,
+          "likes": 0,
+          "purchases": 29,
+          "revenue": 0,
+          "scraped_at": "2026-03-16T01:54:12.980393"
+        }
+      ]
     }
   ]
 }
