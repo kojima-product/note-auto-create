@@ -2839,28 +2839,49 @@
     {
       "url": "https://www.itmedia.co.jp/enterprise/articles/2603/18/news043.html",
       "title": "強力なAIは「想定より早く実現する」　AIによる重要課題の研究組織「Anthropic Institute」設立",
-      "posted_at": "2026-03-18T01:49:56.756958",
+      "posted_at": "2026-03-18T01:50:54.371571",
       "category": "ai",
       "tags": [
         "AI",
         "Anthropic",
         "Claude",
-        "AIガバナンス",
         "機械学習",
-        "テクノロジー",
+        "テクノロジートレンド",
+        "AIガバナンス",
         "エンジニア",
-        "AI倫理"
+        "未来予測"
+      ],
+      "is_free": true,
+      "price": 0,
+      "char_count": 3986,
+      "note_url": "https://note.com/kojima_product/n/nc80a589f8bee",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://kn.itmedia.co.jp/kn/articles/2603/18/news052.html",
+      "title": "生成AIパスポートってどんな試験？　合格した当社の人事担当者に受験意義と勉強法を聞いた",
+      "posted_at": "2026-03-18T02:54:57.316229",
+      "category": "ai",
+      "tags": [
+        "生成AIパスポート",
+        "AI資格",
+        "G検定",
+        "AI人材育成",
+        "生成AI",
+        "DX推進",
+        "スキルアップ",
+        "資格勉強"
       ],
       "is_free": false,
       "price": 300,
-      "char_count": 5921,
-      "note_url": "https://note.com/kojima_product/n/ne00410979cd4",
+      "char_count": 5293,
+      "note_url": "https://note.com/kojima_product/n/n55eb45bba48c",
       "article_type": "speed_analysis"
     },
     {
       "url": "https://www.itmedia.co.jp/aiplus/articles/2603/18/news071.html",
       "title": "OpenAI、「ChatGPT」でモデル管理を改善　応答スタイル「探究心が強い」は廃止",
-      "posted_at": "2026-03-18T01:55:41.820480",
+      "posted_at": "2026-03-18T03:58:46.282958",
       "category": "ai",
       "tags": [
         "ChatGPT",
@@ -2869,13 +2890,76 @@
         "LLM",
         "生成AI",
         "AIツール",
-        "エンジニア",
-        "テクノロジー"
+        "テクノロジートレンド",
+        "エンジニア"
       ],
       "is_free": false,
       "price": 300,
-      "char_count": 5020,
-      "note_url": "https://note.com/kojima_product/n/n67c134db3908",
+      "char_count": 5062,
+      "note_url": "https://note.com/kojima_product/n/n6d8a2d3bd419",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.ibm.com/jp-ja/think/news/2025-open-ai-trends",
+      "title": "2025年のオープンソースAI：より小さく、よりスマートに - IBM",
+      "posted_at": "2026-03-19T01:51:38.892803",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "オープンソース",
+        "LLM",
+        "機械学習",
+        "AIエンジニア",
+        "IBM",
+        "テクノロジートレンド",
+        "エッジAI"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 4972,
+      "note_url": "https://note.com/kojima_product/n/n8c9bf4557915",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/enterprise/articles/2603/19/news051.html",
+      "title": "2028年にインシデント対応の5割はAI関連に　ガートナーが予測",
+      "posted_at": "2026-03-19T02:55:41.458880",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "セキュリティ",
+        "ガートナー",
+        "インシデント対応",
+        "リスク管理",
+        "AIガバナンス",
+        "エンタープライズAI",
+        "サイバーセキュリティ"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5633,
+      "note_url": "https://note.com/kojima_product/n/ne2779770d798",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/business/articles/2603/19/news028.html",
+      "title": "「AI音痴な上司」がチームを壊す？　7割が実感する生成AI活用の「組織的限界」",
+      "posted_at": "2026-03-19T03:59:49.518542",
+      "category": "ai",
+      "tags": [
+        "生成AI",
+        "AI活用",
+        "組織マネジメント",
+        "DX",
+        "ビジネス",
+        "ChatGPT",
+        "AI格差",
+        "働き方改革"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 4727,
+      "note_url": "https://note.com/kojima_product/n/n8cf24dcca0ab",
       "article_type": "speed_analysis"
     }
   ]
