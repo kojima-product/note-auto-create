@@ -2961,6 +2961,69 @@
       "char_count": 4727,
       "note_url": "https://note.com/kojima_product/n/n8cf24dcca0ab",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.businesswire.com/news/home/20251222794983/ja",
+      "title": "オムディア、世界のクラウド・インフラ支出、2025年第3四半期に ...",
+      "posted_at": "2026-03-20T01:33:20.343760",
+      "category": "ai",
+      "tags": [
+        "クラウドインフラ",
+        "AI",
+        "AWS",
+        "クラウドコンピューティング",
+        "テクノロジートレンド",
+        "インフラエンジニア",
+        "生成AI",
+        "機械学習"
+      ],
+      "is_free": true,
+      "price": 0,
+      "char_count": 3862,
+      "note_url": "https://note.com/kojima_product/n/n8c3d9bbde11f",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://yocto-life.co.jp/blog/2025_web_tech_trends",
+      "title": "ヨクト株式会社 | 2025年最新版！Web開発言語トレンドと将来性",
+      "posted_at": "2026-03-20T02:37:10.672717",
+      "category": "ai",
+      "tags": [
+        "Web開発",
+        "プログラミング",
+        "Python",
+        "JavaScript",
+        "Rust",
+        "バックエンド",
+        "テクノロジートレンド",
+        "エンジニア"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5684,
+      "note_url": "https://note.com/kojima_product/n/nd335a086e7cc",
+      "article_type": "trend_overview"
+    },
+    {
+      "url": "https://lopylog.jp/bestbuy-gadget/",
+      "title": "【殿堂入り】最新おすすすめガジェット超まとめ【2025年ベスト ...",
+      "posted_at": "2026-03-20T03:41:24.439503",
+      "category": "ai",
+      "tags": [
+        "ガジェット",
+        "エンジニア",
+        "デスクセットアップ",
+        "在宅勤務",
+        "おすすめガジェット",
+        "生産性向上",
+        "テックグッズ",
+        "ミニPC"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 6086,
+      "note_url": "https://note.com/kojima_product/n/nd330ccdaf4d4",
+      "article_type": "trend_overview"
     }
   ]
 }
