@@ -3024,6 +3024,69 @@
       "char_count": 6086,
       "note_url": "https://note.com/kojima_product/n/nd330ccdaf4d4",
       "article_type": "trend_overview"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/news/articles/2603/21/news022.html",
+      "title": "ソフトバンクGら日本企業連合、米AIデータセンターに約5兆円投資　オハイオ州で着工",
+      "posted_at": "2026-03-21T01:29:35.598645",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "ソフトバンク",
+        "データセンター",
+        "孫正義",
+        "AIインフラ",
+        "テクノロジー",
+        "クラウド",
+        "AIビジネス"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5249,
+      "note_url": "https://note.com/kojima_product/n/n22b81501a999",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/news/articles/2603/21/news021.html",
+      "title": "Microsoft、「Windows 11」のタスクバー移動機能復活や「Copilot」統合見直しを計画",
+      "posted_at": "2026-03-21T02:33:45.607495",
+      "category": "ai",
+      "tags": [
+        "Windows11",
+        "Microsoft",
+        "Copilot",
+        "AI",
+        "テクノロジー",
+        "UX",
+        "エンジニア",
+        "ソフトウェア開発"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6047,
+      "note_url": "https://note.com/kojima_product/n/n6454c1bf6c4a",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://monoist.itmedia.co.jp/mn/articles/2603/21/news008.html",
+      "title": "NVIDIA新チップ、アリババ日本展開――AIシフトを支える国内外の巨大投資",
+      "posted_at": "2026-03-21T03:37:49.873195",
+      "category": "ai",
+      "tags": [
+        "NVIDIA",
+        "アリババ",
+        "AI投資",
+        "半導体",
+        "クラウド",
+        "日本テック",
+        "AIインフラ",
+        "エンジニア必読"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5711,
+      "note_url": "https://note.com/kojima_product/n/n466a412d5f62",
+      "article_type": "speed_analysis"
     }
   ]
 }
