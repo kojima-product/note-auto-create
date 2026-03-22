@@ -3087,6 +3087,69 @@
       "char_count": 5711,
       "note_url": "https://note.com/kojima_product/n/n466a412d5f62",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://note.com/kojima_product/n/n7665b7cd6311",
+      "title": "【2025年総括】フロントエンド開発が「ライブラリ地獄」から解放 ...",
+      "posted_at": "2026-03-22T01:50:19.737689",
+      "category": "ai",
+      "tags": [
+        "フロントエンド",
+        "JavaScript",
+        "Web開発",
+        "プログラミング",
+        "テクノロジートレンド",
+        "ブラウザAPI",
+        "npm",
+        "開発者向け"
+      ],
+      "is_free": true,
+      "price": 0,
+      "char_count": 4349,
+      "note_url": "https://note.com/kojima_product/n/ne61b56f5fd82",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.sms-datatech.co.jp/securitynow/articles/news/019b561a-0ff6-7235-bb6e-ab233de3600c/",
+      "title": "2025年の危険な「脆弱性タイプ」トップ25 | セキュリティNOW ...",
+      "posted_at": "2026-03-22T02:54:07.362830",
+      "category": "ai",
+      "tags": [
+        "セキュリティ",
+        "脆弱性",
+        "MITRE",
+        "CWE",
+        "サイバーセキュリティ",
+        "Webセキュリュリティ",
+        "エンジニア",
+        "セキュアコーディング"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5180,
+      "note_url": "https://note.com/kojima_product/n/n7a9e8fe6372e",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://techblitz.com/report/us-tech-h1-2025-by-tracxn/",
+      "title": "【2025年上半期】米国最新テック企業資金調達レポート - TECHBLITZ",
+      "posted_at": "2026-03-22T03:58:17.477843",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "スタートアップ",
+        "資金調達",
+        "シリコンバレー",
+        "テクノロジートレンド",
+        "機械学習",
+        "投資",
+        "エンジニアキャリア"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5818,
+      "note_url": "https://note.com/kojima_product/n/n572f5bc867a3",
+      "article_type": "speed_analysis"
     }
   ]
 }
