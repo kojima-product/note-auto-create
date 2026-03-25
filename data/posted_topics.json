@@ -3276,6 +3276,69 @@
       "char_count": 5876,
       "note_url": "https://note.com/kojima_product/n/nc53fb0ba9ce4",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/news/articles/2603/25/news067.html",
+      "title": "Arm、初の自社開発チップ「AGI CPU」を発表　Metaと共同開発のエージェンティックAI特化CPU",
+      "posted_at": "2026-03-25T01:50:07.069171",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "Arm",
+        "CPU",
+        "エージェンティックAI",
+        "半導体",
+        "Meta",
+        "OpenAI",
+        "AIインフラ"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5908,
+      "note_url": "https://note.com/kojima_product/n/nbc58884b9fd5",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://monoist.itmedia.co.jp/mn/articles/2603/25/news028.html",
+      "title": "搬送計画を最適化、日立が仕分け業務の生産性を約4倍に高めるAIエンジンを提供",
+      "posted_at": "2026-03-25T02:54:30.661740",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "物流DX",
+        "日立製作所",
+        "フィジカルAI",
+        "自動化",
+        "マテハン",
+        "サプライチェーン",
+        "製造業DX"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6249,
+      "note_url": "https://note.com/kojima_product/n/ncfdcfe857e50",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2603/25/news034.html",
+      "title": "AIの“長期的なコードの保守能力”はどれほどか？　新たな評価テスト「SWE-CI」　中国チームが提案",
+      "posted_at": "2026-03-25T04:00:33.240448",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "LLM",
+        "ソフトウェア開発",
+        "ベンチマーク",
+        "コーディングAI",
+        "機械学習",
+        "エンジニア",
+        "AIツール"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5764,
+      "note_url": "https://note.com/kojima_product/n/n8af006fb6b79",
+      "article_type": "speed_analysis"
     }
   ]
 }
