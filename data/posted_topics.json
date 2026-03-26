@@ -3339,6 +3339,69 @@
       "char_count": 5764,
       "note_url": "https://note.com/kojima_product/n/n8af006fb6b79",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/enterprise/articles/2603/27/news007.html",
+      "title": "「Claude Cowork」とRPAの根本的な違い　AIが“ソフトウェアを殺す”メカニズム",
+      "posted_at": "2026-03-26T01:56:42.433756",
+      "category": "ai",
+      "tags": [
+        "Claude",
+        "Anthropic",
+        "RPA",
+        "AI自動化",
+        "SaaS",
+        "生成AI",
+        "業務効率化",
+        "エンタープライズAI"
+      ],
+      "is_free": false,
+      "price": 500,
+      "char_count": 7183,
+      "note_url": "https://note.com/kojima_product/n/n5903ddad2d2a",
+      "article_type": "comparison"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2603/26/news096.html",
+      "title": "人型ロボ50台が稼働へ　日本に“フィジカルAI向けデータ”収集施設　山善など",
+      "posted_at": "2026-03-26T03:00:53.043423",
+      "category": "ai",
+      "tags": [
+        "フィジカルAI",
+        "人型ロボット",
+        "ロボティクス",
+        "山善",
+        "JHRTI",
+        "AI最新情報",
+        "製造業DX",
+        "AIデータ収集"
+      ],
+      "is_free": false,
+      "price": 500,
+      "char_count": 6487,
+      "note_url": "https://note.com/kojima_product/n/na07904177d3c",
+      "article_type": "practical_guide"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2603/26/news054.html",
+      "title": "“現場で使われないAI”、どう解決？　マイナビの「0→1のハードル」を無くす戦略",
+      "posted_at": "2026-03-26T04:04:54.621458",
+      "category": "ai",
+      "tags": [
+        "AI活用",
+        "AI推進",
+        "企業DX",
+        "マイナビ",
+        "生成AI",
+        "現場AI",
+        "業務効率化",
+        "AIガバナンス"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5361,
+      "note_url": "https://note.com/kojima_product/n/n13a9fabaedd3",
+      "article_type": "speed_analysis"
     }
   ]
 }
