@@ -3402,6 +3402,69 @@
       "char_count": 5361,
       "note_url": "https://note.com/kojima_product/n/n13a9fabaedd3",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/news/articles/2603/27/news067.html",
+      "title": "Google、LLMのメモリ消費を6分の1に削減する新技術「TurboQuant」発表",
+      "posted_at": "2026-03-27T01:56:22.160545",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "LLM",
+        "Google",
+        "機械学習",
+        "TurboQuant",
+        "量子化",
+        "Gemini",
+        "エンジニア"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6537,
+      "note_url": "https://note.com/kojima_product/n/n538b966ee70c",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/news/articles/2603/27/news064.html",
+      "title": "ネットの経験は「きれいさっぱり忘れる」──LINEヤフー会長を退き“AIと起業”に挑む、川邊氏の起業論",
+      "posted_at": "2026-03-27T02:59:54.396608",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "起業",
+        "川邊健太郎",
+        "LINEヤフー",
+        "AIエージェント",
+        "スタートアップ",
+        "テクノロジー",
+        "キャリア"
+      ],
+      "is_free": true,
+      "price": 0,
+      "char_count": 3856,
+      "note_url": "https://note.com/kojima_product/n/ne687dd1ca363",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2603/27/news077.html",
+      "title": "AIが外科手術を支援、術中画像を見て“アドバイス”　慶應医学部発のスタートアップ",
+      "posted_at": "2026-03-27T04:04:09.936524",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "医療AI",
+        "外科手術",
+        "VLM",
+        "慶應義塾大学",
+        "スタートアップ",
+        "機械学習",
+        "医療テクノロジー"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5985,
+      "note_url": "https://note.com/kojima_product/n/n219950a242c3",
+      "article_type": "speed_analysis"
     }
   ]
 }
