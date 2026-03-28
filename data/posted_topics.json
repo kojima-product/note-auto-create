@@ -3465,6 +3465,69 @@
       "char_count": 5985,
       "note_url": "https://note.com/kojima_product/n/n219950a242c3",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/enterprise/articles/2603/28/news016.html",
+      "title": "ドラクエで「対話型AIバディ」誕生　ゲーム業界の機能不全をどう突破するか",
+      "posted_at": "2026-03-28T01:48:13.627030",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "ゲーム業界",
+        "スクウェアエニックス",
+        "GoogleCloud",
+        "生成AI",
+        "ドラゴンクエスト",
+        "ゲーム開発",
+        "テクノロジー"
+      ],
+      "is_free": true,
+      "price": 0,
+      "char_count": 4226,
+      "note_url": "https://note.com/kojima_product/n/neddf16e6a5c2",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://it-biz.jp/date/2025/12",
+      "title": "2025 12月 一覧 | 一般社団法人 ITビジネス研究会",
+      "posted_at": "2026-03-28T02:52:22.631088",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "AIエージェント",
+        "デジタルツイン",
+        "アクセンチュア",
+        "SIer",
+        "DX推進",
+        "ソフトウェア開発自動化",
+        "生産性向上"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6050,
+      "note_url": "https://note.com/kojima_product/n/nb9b83ccf2fa5",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://kaopiz.com/ja-news-tech-trends-2025/",
+      "title": "2025年の最新テクノロジートレンド25選｜企業が注目すべき未来予測",
+      "posted_at": "2026-03-28T03:56:23.838709",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "テクノロジートレンド",
+        "生成AI",
+        "量子コンピューティング",
+        "機械学習",
+        "DX",
+        "エンジニア",
+        "スマートシティ"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5462,
+      "note_url": "https://note.com/kojima_product/n/n35688fea7e7b",
+      "article_type": "trend_overview"
     }
   ]
 }
