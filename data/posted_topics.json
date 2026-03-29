@@ -3528,6 +3528,69 @@
       "char_count": 5462,
       "note_url": "https://note.com/kojima_product/n/n35688fea7e7b",
       "article_type": "trend_overview"
+    },
+    {
+      "url": "https://www.jiitak.co.jp/blog/top-web-and-app-frameworks",
+      "title": "【2025年版】注目のアプリ開発フレームワーク - JIITAK",
+      "posted_at": "2026-03-29T01:59:11.181450",
+      "category": "ai",
+      "tags": [
+        "フレームワーク",
+        "アプリ開発",
+        "Web開発",
+        "React",
+        "Next.js",
+        "Flutter",
+        "プログラミング",
+        "エンジニア"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6122,
+      "note_url": "https://note.com/kojima_product/n/n50845e5cf0e5",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://aka-link.net/it-infrastructure/",
+      "title": "ITインフラ 2025年 注目トレンド予測：最新技術と未来戦略を解説",
+      "posted_at": "2026-03-29T03:03:17.523255",
+      "category": "ai",
+      "tags": [
+        "ITインフラ",
+        "クラウド",
+        "エッジコンピューティング",
+        "AI",
+        "DevOps",
+        "Kubernetes",
+        "セキュリティ",
+        "テクノロジートレンド"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 6018,
+      "note_url": "https://note.com/kojima_product/n/n6c4be93a1441",
+      "article_type": "trend_overview"
+    },
+    {
+      "url": "https://jp.linkedin.com/pulse/frontend-development-2025-essential-techniques-rufat-aliyev-rzkle?tl=ja",
+      "title": "2025 年のフロントエンド開発: 必須の技術とテクノロジー - LinkedIn",
+      "posted_at": "2026-03-29T04:07:10.022148",
+      "category": "ai",
+      "tags": [
+        "フロントエンド開発",
+        "AI開発ツール",
+        "サーバーファーストアーキテクチャ",
+        "Webパフォーマンス",
+        "React",
+        "Next.js",
+        "JavaScript",
+        "エンジニアキャリア"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6044,
+      "note_url": "https://note.com/kojima_product/n/nfaef58007dd5",
+      "article_type": "speed_analysis"
     }
   ]
 }
