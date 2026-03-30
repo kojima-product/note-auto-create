@@ -3591,6 +3591,68 @@
       "char_count": 6044,
       "note_url": "https://note.com/kojima_product/n/nfaef58007dd5",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/enterprise/articles/2603/30/news024.html",
+      "title": "地銀の属人的業務をAIに任せられるか　中国銀行と日立が描く自律化ロードマップ",
+      "posted_at": "2026-03-30T02:00:51.714968",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "AIエージェント",
+        "金融DX",
+        "銀行",
+        "日立製作所",
+        "LLM",
+        "業務自動化",
+        "DX"
+      ],
+      "is_free": true,
+      "price": 0,
+      "char_count": 3773,
+      "note_url": "https://note.com/kojima_product/n/ne25a5d7d26d7",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/business/articles/2603/30/news055.html",
+      "title": "フジクラが米ビッグテックに指名買いされる理由　生成AIが伸びると、なぜ「光配線」が儲かるのか",
+      "posted_at": "2026-03-30T03:05:06.056554",
+      "category": "ai",
+      "tags": [
+        "生成AI",
+        "フジクラ",
+        "光ファイバー",
+        "データセンター",
+        "AIインフラ",
+        "半導体",
+        "テクノロジー投資"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5876,
+      "note_url": "https://note.com/kojima_product/n/n31ac4062c5cf",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2603/30/news094.html",
+      "title": "12作品で“AI不使用”なのに「AI生成」と誤表記　電子書籍配信「クロスフォリオ出版」が経緯明かす",
+      "posted_at": "2026-03-30T04:09:02.259992",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "電子書籍",
+        "クリエイター",
+        "BookLive",
+        "AI表記",
+        "生成AI",
+        "著作権",
+        "コンテンツ制作"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5388,
+      "note_url": "https://note.com/kojima_product/n/n182babf9c68a",
+      "article_type": "speed_analysis"
     }
   ]
 }
