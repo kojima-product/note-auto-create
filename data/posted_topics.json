@@ -3716,6 +3716,69 @@
       "char_count": 4101,
       "note_url": "https://note.com/kojima_product/n/naf87034bf3fe",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/enterprise/articles/2604/01/news014.html",
+      "title": "Claude拡張機能に深刻な脆弱性　閲覧だけでWebブラウザ乗っ取りの恐れ",
+      "posted_at": "2026-04-01T02:05:57.016589",
+      "category": "ai",
+      "tags": [
+        "Claude",
+        "セキュリティ",
+        "脆弱性",
+        "XSS",
+        "AI",
+        "ブラウザ拡張機能",
+        "プロンプトインジェクション",
+        "Anthropic"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5984,
+      "note_url": "https://note.com/kojima_product/n/n4df8749fe987",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2604/01/news073.html",
+      "title": "“人間向けWebサイト”やめます――AI向けに「Markdown」表示　インターリンク「エイプリルフールではない」",
+      "posted_at": "2026-04-01T03:10:00.869686",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "Markdown",
+        "Web開発",
+        "フロントエンド",
+        "AIエージェント",
+        "インターリンク",
+        "Webデザイン",
+        "テクノロジートレンド"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5838,
+      "note_url": "https://note.com/kojima_product/n/n7cdd0288dc43",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/news/articles/2604/01/news059.html",
+      "title": "OpenAI、ソフトバンクGなどから約19兆円調達　「AIスーパーアプリ」構想を加速",
+      "posted_at": "2026-04-01T04:13:54.360725",
+      "category": "ai",
+      "tags": [
+        "OpenAI",
+        "AI",
+        "人工知能",
+        "ソフトバンク",
+        "スタートアップ",
+        "テクノロジー",
+        "AIエンジニア",
+        "LLM"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 4989,
+      "note_url": "https://note.com/kojima_product/n/naa4f6031fdd2",
+      "article_type": "speed_analysis"
     }
   ]
 }
