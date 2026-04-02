@@ -3779,6 +3779,69 @@
       "char_count": 4989,
       "note_url": "https://note.com/kojima_product/n/naa4f6031fdd2",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/enterprise/articles/2604/02/news027.html",
+      "title": "便利さの裏で進む“静かな崩壊”　AIセキュリティの死角を掘り下げる",
+      "posted_at": "2026-04-02T01:54:15.948165",
+      "category": "ai",
+      "tags": [
+        "AIセキュリティ",
+        "AIエージェント",
+        "サイバーセキュリティ",
+        "LLM",
+        "プロンプトインジェクション",
+        "ゼロトラスト",
+        "エンタープライズAI",
+        "セキュリティエンジニア"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5919,
+      "note_url": "https://note.com/kojima_product/n/nf26bcd12af4f",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/enterprise/articles/2604/02/news052.html",
+      "title": "アクセンチュアとデータブリックスがパートナーシップ拡大　データのサイロ化を打破、AIの本番運用移行を支援",
+      "posted_at": "2026-04-02T02:58:38.892214",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "データエンジニアリング",
+        "Databricks",
+        "アクセンチュア",
+        "データサイロ",
+        "MLOps",
+        "エンタープライズAI",
+        "DX"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5661,
+      "note_url": "https://note.com/kojima_product/n/na2b16967b35d",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://xtech.nikkei.com/atcl/nxt/column/18/00848/00183/",
+      "title": "2025年の法人向けIT企業ランキング、クラウドとハードがAI需要で ...",
+      "posted_at": "2026-04-02T04:02:44.971819",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "クラウド",
+        "IT業界",
+        "テクノロジー",
+        "機械学習",
+        "エンジニア",
+        "ビジネストレンド",
+        "半導体"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5363,
+      "note_url": "https://note.com/kojima_product/n/n54c0cf688b85",
+      "article_type": "trend_overview"
     }
   ]
 }
