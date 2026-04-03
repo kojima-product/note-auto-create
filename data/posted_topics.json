@@ -3842,6 +3842,69 @@
       "char_count": 5363,
       "note_url": "https://note.com/kojima_product/n/n54c0cf688b85",
       "article_type": "trend_overview"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/news/articles/2604/03/news064.html",
+      "title": "2030年までに、1兆パラメータを持つLLMの推論コストが90％以上削減される　ガートナー予想",
+      "posted_at": "2026-04-03T01:55:41.470383",
+      "category": "ai",
+      "tags": [
+        "AI",
+        "LLM",
+        "ガートナー",
+        "機械学習",
+        "生成AI",
+        "AIコスト削減",
+        "テクノロジートレンド",
+        "エンジニア"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6250,
+      "note_url": "https://note.com/kojima_product/n/n96bdc7c2fecb",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://codezine.jp/article/detail/22108",
+      "title": "【2025年最新】AIプログラミング完全ガイド 開発効率を爆速化する ...",
+      "posted_at": "2026-04-03T02:59:46.381433",
+      "category": "ai",
+      "tags": [
+        "AIプログラミング",
+        "GitHub Copilot",
+        "Cursor",
+        "LLM",
+        "開発効率化",
+        "エンジニア",
+        "プログラミング学習",
+        "AI活用"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6085,
+      "note_url": "https://note.com/kojima_product/n/n3413b40ed63e",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/business/articles/2604/03/news018.html",
+      "title": "「PC触らない」工場作業員をたった“2カ月”で「AI活用キーパーソン」に　ダイハツが進める地道なDX人材育成",
+      "posted_at": "2026-04-03T04:04:10.055282",
+      "category": "ai",
+      "tags": [
+        "DX",
+        "AI活用",
+        "人材育成",
+        "製造業",
+        "ダイハツ",
+        "デジタルトランスフォーメーション",
+        "現場DX",
+        "AIリテラシー"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6106,
+      "note_url": "https://note.com/kojima_product/n/nef51d20c48c1",
+      "article_type": "speed_analysis"
     }
   ]
 }
