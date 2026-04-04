@@ -3905,6 +3905,69 @@
       "char_count": 6106,
       "note_url": "https://note.com/kojima_product/n/nef51d20c48c1",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://codezine.jp/article/detail/22235",
+      "title": "【2025年最新】Pythonとは？学習入門ガイドや活用例 - CodeZine",
+      "posted_at": "2026-04-04T01:48:22.191516",
+      "category": "ai",
+      "tags": [
+        "Python",
+        "プログラミング入門",
+        "AI開発",
+        "機械学習",
+        "データサイエンス",
+        "キャリアアップ",
+        "エンジニア",
+        "プログラミング学習"
+      ],
+      "is_free": true,
+      "price": 0,
+      "char_count": 4915,
+      "note_url": "https://note.com/kojima_product/n/naadf44d17df9",
+      "article_type": "practical_guide"
+    },
+    {
+      "url": "https://1on1f.com/articles/detail/2",
+      "title": "【2025年最新】Javaフレームワーク5選 - 1on1Freelance",
+      "posted_at": "2026-04-04T02:52:25.696144",
+      "category": "ai",
+      "tags": [
+        "Java",
+        "Javaフレームワーク",
+        "SpringBoot",
+        "Web開発",
+        "バックエンド",
+        "プログラミング",
+        "エンジニア",
+        "フレームワーク選定"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6206,
+      "note_url": "https://note.com/kojima_product/n/n122f8fb54492",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2604/03/news113.html",
+      "title": "IBMとArmが戦略的提携　AI対応でメインフレームの柔軟性確保へ",
+      "posted_at": "2026-04-04T03:56:33.130069",
+      "category": "ai",
+      "tags": [
+        "IBM",
+        "Arm",
+        "メインフレーム",
+        "AI",
+        "クラウド",
+        "仮想化",
+        "エンタープライズ",
+        "テクノロジー"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6202,
+      "note_url": "https://note.com/kojima_product/n/ndf97242b46a8",
+      "article_type": "speed_analysis"
     }
   ]
 }
