@@ -3968,6 +3968,69 @@
       "char_count": 6202,
       "note_url": "https://note.com/kojima_product/n/ndf97242b46a8",
       "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/news/articles/2604/05/news019.html",
+      "title": "OpenAIの“AGI担当CEO”シモ氏が療養休職　ライトキャップCOOが“特別プロジェクト”担当に",
+      "posted_at": "2026-04-05T02:00:42.684116",
+      "category": "ai",
+      "tags": [
+        "OpenAI",
+        "AGI",
+        "AI業界",
+        "テクノロジー",
+        "経営",
+        "人工知能",
+        "シリコンバレー",
+        "AI最新情報"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5309,
+      "note_url": "https://note.com/kojima_product/n/n26ee113c4e5d",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://www.itmedia.co.jp/aiplus/articles/2604/05/news018.html",
+      "title": "「Claude」で「OpenClaw」などの利用がサブスク対象外に　API利用や追加使用量購入が必要",
+      "posted_at": "2026-04-05T03:04:36.465595",
+      "category": "ai",
+      "tags": [
+        "Claude",
+        "Anthropic",
+        "AI",
+        "LLM",
+        "OpenClaw",
+        "APIコスト",
+        "AIツール",
+        "エンジニア"
+      ],
+      "is_free": false,
+      "price": 400,
+      "char_count": 6063,
+      "note_url": "https://note.com/kojima_product/n/n72edd6fbc347",
+      "article_type": "speed_analysis"
+    },
+    {
+      "url": "https://jp.linkedin.com/pulse/best-backend-languages-frameworks-web-projects-2025-zibtek-lrycf?tl=ja",
+      "title": "2025年のウェブプロジェクトに最適なバックエンド言語とフレーム ...",
+      "posted_at": "2026-04-05T04:08:10.795206",
+      "category": "ai",
+      "tags": [
+        "バックエンド開発",
+        "Web開発",
+        "プログラミング",
+        "Node.js",
+        "Python",
+        "フレームワーク",
+        "エンジニア",
+        "AI開発"
+      ],
+      "is_free": false,
+      "price": 300,
+      "char_count": 5523,
+      "note_url": "https://note.com/kojima_product/n/n7dcf77624ffd",
+      "article_type": "speed_analysis"
     }
   ]
 }
